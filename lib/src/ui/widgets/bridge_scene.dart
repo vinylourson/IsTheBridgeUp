@@ -42,6 +42,25 @@ class _Layout {
   ];
 }
 
+/// Something crossing the bridge: its animation frames, how fast it moves,
+/// where in the loop it starts, which way it faces, and where it sits when
+/// motion is reduced.
+class _Traveller {
+  const _Traveller(
+    this.frames,
+    this.speed,
+    this.phase,
+    this.flip,
+    this.restingX,
+  );
+
+  final List<List<String>> frames;
+  final double speed;
+  final double phase;
+  final bool flip;
+  final double restingX;
+}
+
 /// The Chaban-Delmas bridge as a pixel-art scene: two lift towers, a span that
 /// rises, water below, and either traffic crossing or a ship passing under.
 class BridgeScene extends StatefulWidget {
@@ -268,35 +287,51 @@ class _BridgeScenePainter extends CustomPainter {
     }
   }
 
-  /// Vehicles crossing while the bridge is open, each at its own pace.
+  /// Everything crossing while the bridge is open, each at its own pace:
+  /// cars, a moto, a cyclist, and people on foot.
+  ///
+  /// Each entry carries a list of frames. Most have one; pedestrians have two,
+  /// and the frame is picked from distance travelled rather than from a timer,
+  /// so the walk cycle stays in step with the walking speed instead of
+  /// drifting against it.
   void _paintTraffic(Canvas canvas, double px) {
     const double span = _Layout.width + 48;
-    final List<(List<String> rows, double speed, double phase, bool flip)> traffic =
-        <(List<String>, double, double, bool)>[
-      (PixelSprites.car, 1.0, 0.00, false),
-      (PixelSprites.moto, 1.35, 0.45, false),
-      (PixelSprites.bicycle, 0.7, 0.70, true),
+    const List<List<String>> walking = <List<String>>[
+      PixelSprites.pedestrianA,
+      PixelSprites.pedestrianB,
     ];
 
-    // A composed frame for the reduced-motion case: all three vehicles
-    // visible and evenly spaced, rather than mid-loop wherever they landed.
-    const List<double> restingX = <double>[8, 60, 112];
+    const List<_Traveller> traffic = <_Traveller>[
+      _Traveller(<List<String>>[PixelSprites.car], 1.0, 0.00, false, 4),
+      _Traveller(<List<String>>[PixelSprites.moto], 1.35, 0.45, false, 46),
+      _Traveller(<List<String>>[PixelSprites.bicycle], 0.7, 0.70, true, 118),
+      // People walk far slower than anything with wheels.
+      _Traveller(walking, 0.32, 0.15, false, 72),
+      _Traveller(walking, 0.28, 0.60, true, 88),
+    ];
 
-    for (final (int i, (List<String> rows, double speed, double phase, bool flip))
-        in traffic.indexed) {
-      final PixelMatrix matrix = PixelMatrix.of(rows);
-      final double t = (drift * speed + phase) % 1.0;
-      // Right-to-left for the flipped sprite, so both directions are used.
+    for (final _Traveller traveller in traffic) {
+      final double t = (drift * traveller.speed + traveller.phase) % 1.0;
+      // Right-to-left for flipped sprites, so both directions are used.
+      // When motion is reduced, everything sits at a composed resting spot
+      // instead of freezing wherever the loop happened to be.
       final double x = !animate
-          ? restingX[i]
-          : flip
+          ? traveller.restingX
+          : traveller.flip
           ? _Layout.width - t * span
           : -24 + t * span;
+
+      // One frame change every 3 sprite pixels of travel.
+      final int frame = traveller.frames.length == 1
+          ? 0
+          : (x / 3).floor().abs() % traveller.frames.length;
+
+      final PixelMatrix matrix = PixelMatrix.of(traveller.frames[frame]);
       matrix.paint(
         canvas,
         Offset(x * px, (_Layout.deckY - matrix.height) * px),
         px,
-        flip: flip,
+        flip: traveller.flip,
       );
     }
   }
