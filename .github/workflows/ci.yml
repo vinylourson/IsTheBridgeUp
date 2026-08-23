@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+env:
+  FLUTTER_VERSION: 3.47.1
+
+jobs:
+  test:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Verify generated localizations are current
+        run: |
+          flutter gen-l10n
+          git diff --exit-code lib/l10n \
+            || (echo "::error::lib/l10n is stale — run 'flutter gen-l10n' and commit"; exit 1)
+
+      - name: Verify generated sprites are current
+        run: |
+          python3 tools/gen_sprites.py
+          git diff --exit-code lib/src/ui/theme/pixel_sprites.dart \
+            || (echo "::error::pixel_sprites.dart is stale — run 'python3 tools/gen_sprites.py' and commit"; exit 1)
+
+      - run: flutter analyze
+
+      # Goldens are excluded: font rasterisation differs from the macOS machine
+      # that generated them. `live` is excluded so CI never fails because a
+      # third-party API had a bad minute — the scheduled job below covers that.
+      - run: flutter test --exclude-tags "live,golden"
+
+      - run: flutter build web --base-href /IsTheBridgeUp/
+
+  feed-canary:
+    name: Live feed canary
+    runs-on: ubuntu-latest
+    # Kept separate so an upstream outage never blocks a merge, but still tells
+    # us loudly when the open-data API moves or changes shape again.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter test --tags live

@@ -1,2 +1,176 @@
-# canIUseTheBridge
-A small website that tries to show when the Chaban-Delmas bridge in Bordeaux (France) will be closed (i.e when a boat comes and the bridge needs to lift up). 
+# IsTheBridgeUp
+
+Know whether you can cross the **Pont Chaban-Delmas** in Bordeaux — before you
+end up stuck on the wrong bank of the Garonne for an hour.
+
+The bridge is a vertical-lift bridge: its central span rises to let tall ships
+up the river, and while it is up the road is shut. Bordeaux Métropole publishes
+the forecast closures as open data. This app turns that into one answer.
+
+Built with Flutter so a single codebase covers web, Android and iOS.
+**This pass ships the web app**; the mobile targets are wired for but not yet
+enabled (see [Roadmap](#roadmap)).
+
+![The status screen, open and closed](test/golden/goldens/status_open_en.png)
+
+## What it does
+
+- **Status** — a plain OPEN / CLOSED verdict, a live countdown, and a pixel-art
+  scene of the bridge that raises its span and lets a ship through.
+- **List** — every upcoming closure, with vessel names and durations.
+- **Alerts** — reminder settings. The scheduling logic is done and tested; on
+  web there is nothing to deliver it, and the screen says so.
+- **Info** — attribution, licence, and the caveat that these are *forecasts*.
+
+Fully localised in **French and English**, following the device locale.
+
+## The data
+
+Bordeaux Métropole's OpenDataSoft Explore v2.1 API:
+
+```
+https://datahub.bordeaux-metropole.fr/api/explore/v2.1/catalog/datasets/previsions_pont_chaban/records
+```
+
+Fronted on data.gouv.fr as
+[pont-chaban-previsions-fermeture-1](https://www.data.gouv.fr/datasets/pont-chaban-previsions-fermeture-1),
+under the *Licence Ouverte / Open Licence*. It sends
+`access-control-allow-origin: *`, so the web build calls it directly with no
+proxy. Anonymous rate limit is 50,000 requests/day.
+
+Six fields, all text except `date_passage`:
+`bateau`, `date_passage`, `fermeture_a_la_circulation`,
+`re_ouverture_a_la_circulation`, `type_de_fermeture`, `fermeture_totale`.
+
+There is **no real-time feed** — nothing reports whether the span is up right
+now. Status is derived from the forecast, and the app says so rather than
+implying certainty.
+
+### Four things this feed will get you wrong
+
+All four are handled in [`bridge_clock.dart`](lib/src/domain/bridge_clock.dart)
+and pinned by tests. They are written down here because each one silently
+produces a *plausible* wrong answer, which is the worst kind for an app whose
+whole job is telling you not to drive to the bridge.
+
+1. **`where=date_passage >= now()` drops today's closures.** `date_passage` is a
+   date at midnight, so today's midnight is already in the past. Run on
+   2026-08-23, that query returned 36 rows and omitted *both* of that day's
+   closures. Query from **yesterday** and filter client-side instead.
+2. **Rows are not time-ordered within a day.** The live feed returned `14:04`
+   before `04:19` for the same date. Sort on the computed start instant.
+3. **Closures can span midnight.** Six rows reopen *before* they close
+   (`23:00 → 05:00`). Read as same-day, they produce a negative duration.
+4. **Times are Europe/Paris with no zone attached, and DST is real.** An
+   overnight closure is 5 real hours across the spring-forward night and 7
+   across the fall-back one, not 6. Build the end from calendar fields in the
+   bridge's own zone — `start.add(Duration(days: 1))` is an hour wrong twice a
+   year.
+
+## Architecture
+
+Flutter's recommended MVVM, with `provider` for wiring. No code generation.
+
+```
+lib/
+  main.dart                     entry point: tz init, DI, runApp
+  l10n/                         ARB sources + generated AppLocalizations
+  src/
+    app.dart                    MaterialApp, theme, tab shell
+    core/                       config, Result, typed errors
+    domain/                     PURE: Closure, BridgeStatus, BridgeClock,
+                                ReminderPlanner — no HTTP, no widgets, no
+                                ambient clock, so the hard parts are cheap
+                                to test
+    data/
+      services/                 API, offline cache, notification interface
+      repositories/             ClosureRepository: cache-first source of truth
+    ui/
+      theme/                    C64 palette, text styles, generated sprites
+      widgets/                  PixelSprite, panels, buttons, bridge scene
+      status/ schedule/ alerts/ info/    view + view-model per screen
+tools/gen_sprites.py            draws the sprites, emits pixel_sprites.dart
+```
+
+`BridgeClock` takes an injectable `now`, so every time-dependent behaviour is
+testable without waiting for a clock.
+
+## Design
+
+8-bit pixel art on the real **Commodore 64 (Pepto) palette**. Sticking to one
+hardware palette is what stops it looking merely retro-ish.
+
+Sprites are **not image files**. They are character matrices generated by
+[`tools/gen_sprites.py`](tools/gen_sprites.py) into
+[`pixel_sprites.dart`](lib/src/ui/theme/pixel_sprites.dart), then painted as
+run-length rectangles at whole-number scale. So they are diffable, tweakable in
+code, crisp at any DPI, and need no binary assets. Re-run after editing:
+
+```bash
+python3 tools/gen_sprites.py     # rewrites pixel_sprites.dart + a preview PNG
+```
+
+Type is `Press Start 2P` (chrome, labels, tabs) and `Silkscreen` (content and
+the verdict), both OFL and bundled.
+
+> Pixel fonts have sparse coverage, and Google Fonts' declared `unicode-range`
+> is **not** proof a glyph exists. `→` is genuinely absent from Silkscreen and
+> rendered as tofu in both languages; Press Start 2P crams `É` into the same
+> box as `E`, so "PONT FERMÉ" looked like a typo. Both are fixed, and
+> [`font_coverage_test.dart`](test/font_coverage_test.dart) parses the actual
+> TTF `cmap` tables to make sure no UI string ever uses a glyph the fonts lack.
+
+## Running it
+
+Needs Flutter 3.47.1 (`brew install --cask flutter`).
+
+```bash
+flutter pub get
+flutter run -d chrome                              # develop
+flutter test                                       # everything
+flutter test --exclude-tags "live,golden"           # what CI runs
+flutter build web --base-href /IsTheBridgeUp/       # production build
+```
+
+### Tests
+
+| Suite | Covers |
+|---|---|
+| `bridge_clock_test.dart` | the four traps above, DST, malformed rows |
+| `chaban_api_service_test.dart` | query shape, both payload shapes, errors |
+| `closure_repository_test.dart` | cache-first, offline, corrupt cache, staleness |
+| `reminder_planner_test.dart` | which reminders get scheduled, and when |
+| `font_coverage_test.dart` | every UI character has a real glyph |
+| `layout_test.dart` | no overflow, 320→1200pt, both locales, every tab |
+| `golden/` | pixel-exact screenshots (tag `golden`) |
+| `live_api_test.dart` | canary: the real endpoint and schema (tag `live`) |
+
+The `live` canary exists because the previous version of this app died silently
+when the old OpenDataSoft v1 endpoint was retired. It runs as its own
+non-blocking CI job so an upstream outage never fails a merge, but still says so
+loudly.
+
+## Roadmap
+
+- **Android and iOS.** The code is platform-agnostic; enable the targets
+  (`flutter create --platforms android,ios .`) and install the toolchains.
+- **Local notifications.** `ReminderPlanner` already decides what to schedule.
+  Delivery needs `flutter_local_notifications`, which has no web support and
+  imports `dart:io` — it is deliberately absent from `pubspec.yaml` so the web
+  build stays clean. Adding it means implementing `NotificationService` and
+  swapping one line in `main.dart`.
+- **Which bank am I on** — geolocation, picking up the idea from the abandoned
+  `whereAmI` branch.
+- **Calendar export** (`.ics`).
+
+## History
+
+This began as an Angular 16 learning project that rendered a raw HTML table.
+It stopped working when its data source, the OpenDataSoft **v1** API, was
+retired. That version is preserved in git history (`e03cbd7`, `fb6e16d`) and on
+the `gh-pages` branch.
+
+## Licence
+
+GPL-3.0 — see [LICENSE](LICENSE). Bridge data © Bordeaux Métropole under the
+Licence Ouverte. Fonts under the SIL Open Font License (see `assets/fonts/`).
