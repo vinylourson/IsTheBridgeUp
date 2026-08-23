@@ -1,10 +1,19 @@
 name: CI
 
+# `push` is restricted to main on purpose. Listing dev here as well meant every
+# commit on a branch with an open PR ran CI twice -- once for the push, once for
+# the pull_request -- for identical results.
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
     branches: [main, dev]
+  workflow_dispatch:
+
+# Superseded runs on the same ref are pointless once a newer commit exists.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   FLUTTER_VERSION: 3.47.1
