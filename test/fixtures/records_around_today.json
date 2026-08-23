@@ -1,0 +1,61 @@
+{
+    "total_count": 7,
+    "results": [
+        {
+            "bateau": "MAINTENANCE",
+            "date_passage": "2026-08-19",
+            "fermeture_a_la_circulation": "23:00",
+            "re_ouverture_a_la_circulation": "05:00",
+            "type_de_fermeture": "Totale",
+            "fermeture_totale": "oui"
+        },
+        {
+            "bateau": "MV DEUTSCHLAND",
+            "date_passage": "2026-08-22",
+            "fermeture_a_la_circulation": "15:29",
+            "re_ouverture_a_la_circulation": "16:37",
+            "type_de_fermeture": "Totale",
+            "fermeture_totale": "oui"
+        },
+        {
+            "bateau": "MV DEUTSCHLAND",
+            "date_passage": "2026-08-23",
+            "fermeture_a_la_circulation": "14:04",
+            "re_ouverture_a_la_circulation": "15:27",
+            "type_de_fermeture": "Totale",
+            "fermeture_totale": "oui"
+        },
+        {
+            "bateau": "AZAMARA QUEST",
+            "date_passage": "2026-08-23",
+            "fermeture_a_la_circulation": "04:19",
+            "re_ouverture_a_la_circulation": "05:27",
+            "type_de_fermeture": "Totale",
+            "fermeture_totale": "oui"
+        },
+        {
+            "bateau": "AZAMARA QUEST - STAR LEGEND",
+            "date_passage": "2026-08-25",
+            "fermeture_a_la_circulation": "17:49",
+            "re_ouverture_a_la_circulation": "19:57",
+            "type_de_fermeture": "Totale",
+            "fermeture_totale": "oui"
+        },
+        {
+            "bateau": "STAR LEGEND",
+            "date_passage": "2026-08-28",
+            "fermeture_a_la_circulation": "07:34",
+            "re_ouverture_a_la_circulation": "08:57",
+            "type_de_fermeture": "Totale",
+            "fermeture_totale": "oui"
+        },
+        {
+            "bateau": "EVRIMA - SILVER SPIRIT",
+            "date_passage": "2026-08-31",
+            "fermeture_a_la_circulation": "09:44",
+            "re_ouverture_a_la_circulation": "12:02",
+            "type_de_fermeture": "Totale",
+            "fermeture_totale": "oui"
+        }
+    ]
+}
