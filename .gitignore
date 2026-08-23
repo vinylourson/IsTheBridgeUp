@@ -46,3 +46,9 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Preview images written by the generators in tools/. Developer aids, not
+# build inputs -- regenerate with `python3 tools/gen_sprites.py` /
+# `python3 tools/gen_icons.py` rather than tracking binary churn.
+/tools/sprite_preview.png
+/tools/icon_preview.png
