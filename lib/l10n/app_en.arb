@@ -1,0 +1,81 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Is The Bridge Up?",
+  "bridgeName": "Chaban-Delmas Bridge",
+  "bridgeCity": "Bordeaux",
+
+  "statusOpen": "BRIDGE OPEN",
+  "statusClosed": "BRIDGE CLOSED",
+  "statusUnknown": "NO DATA",
+
+  "youMayCross": "You may cross",
+  "takeAnotherRoute": "Take another route",
+  "noDataYet": "Could not load the schedule",
+
+  "nextClosureIn": "Next closure in {duration}",
+  "@nextClosureIn": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "reopensIn": "Reopens in {duration}",
+  "@reopensIn": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "reopensAt": "Reopens at {time}",
+  "@reopensAt": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "noUpcomingClosures": "No closures scheduled",
+  "closureWindow": "{start} > {end}",
+  "@closureWindow": {
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+
+  "durationDay": "{value}d",
+  "@durationDay": { "placeholders": { "value": { "type": "int" } } },
+  "durationHour": "{value}h",
+  "@durationHour": { "placeholders": { "value": { "type": "int" } } },
+  "durationMinute": "{value}m",
+  "@durationMinute": { "placeholders": { "value": { "type": "int" } } },
+  "durationLessThanAMinute": "under a minute",
+
+  "tabStatus": "STATUS",
+  "tabSchedule": "LIST",
+  "tabAlerts": "ALERTS",
+  "tabInfo": "INFO",
+
+  "scheduleTitle": "Next lifts",
+  "scheduleEmpty": "Nothing scheduled. The feed has no closures left.",
+  "maintenanceLabel": "Maintenance",
+  "todayLabel": "Today",
+  "tomorrowLabel": "Tomorrow",
+  "overnightNote": "overnight",
+  "durationLabel": "{duration} closed",
+  "@durationLabel": { "placeholders": { "duration": { "type": "String" } } },
+
+  "inProgress": "IN PROGRESS",
+
+  "refresh": "Refresh",
+  "retry": "Retry",
+  "loading": "Loading…",
+  "updatedAt": "Updated {time}",
+  "@updatedAt": { "placeholders": { "time": { "type": "String" } } },
+  "offlineStale": "Offline — showing data from {time}",
+  "@offlineStale": { "placeholders": { "time": { "type": "String" } } },
+  "refreshFailed": "Could not refresh. Showing saved data.",
+
+  "alertsTitle": "Alerts",
+  "alertsUnavailableOnWeb": "Alerts need the phone app. The web version cannot schedule reminders.",
+  "alertsLeadTime": "Warn me before a closure",
+
+  "infoTitle": "Info",
+  "infoWhat": "The Chaban-Delmas bridge lifts to let tall ships up the Garonne. When it does, the road is closed for around an hour and the detour is long. This app tells you whether you can cross.",
+  "infoForecastCaveat": "These are forecasts published by Bordeaux Métropole, not a live sensor. Times can move, and a lift can be cancelled. Check before relying on it.",
+  "infoTimesInParis": "All times are Bordeaux local time (Europe/Paris).",
+  "infoDataSource": "Data source",
+  "infoLicence": "Licence",
+  "infoOpenSourcePage": "Open the dataset page"
+}

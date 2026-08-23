@@ -1,0 +1,56 @@
+name: is_the_bridge_up
+description: "Know when the Chaban-Delmas bridge in Bordeaux is lifted, before you get stuck on the wrong bank."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Feed access.
+  http: ^1.6.0
+
+  # The feed's wall-clock times are Europe/Paris with no zone attached, so we
+  # resolve them against a real tz database rather than the device clock.
+  timezone: ^0.11.1
+
+  # Date/time and duration formatting per locale.
+  intl: ^0.20.3
+
+  # MVVM wiring: ChangeNotifier view models + repository injection.
+  provider: ^6.1.5
+
+  # Offline snapshot of the last successful fetch.
+  shared_preferences: ^2.5.5
+  url_launcher: ^6.3.2
+  cupertino_icons: ^1.0.9
+
+  # NOTE: flutter_local_notifications is deliberately NOT a dependency yet.
+  # It has no web implementation and pulls in dart:io, which breaks
+  # `flutter build web`. NotificationService is an interface with a web no-op;
+  # the plugin gets added alongside the Android/iOS targets.
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Generates AppLocalizations from lib/l10n/*.arb (see l10n.yaml).
+  generate: true
+
+  fonts:
+    - family: PressStart2P
+      fonts:
+        - asset: assets/fonts/PressStart2P-Regular.ttf
+    - family: Silkscreen
+      fonts:
+        - asset: assets/fonts/Silkscreen-Regular.ttf

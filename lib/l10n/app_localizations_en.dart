@@ -1,0 +1,174 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get appTitle => 'Is The Bridge Up?';
+
+  @override
+  String get bridgeName => 'Chaban-Delmas Bridge';
+
+  @override
+  String get bridgeCity => 'Bordeaux';
+
+  @override
+  String get statusOpen => 'BRIDGE OPEN';
+
+  @override
+  String get statusClosed => 'BRIDGE CLOSED';
+
+  @override
+  String get statusUnknown => 'NO DATA';
+
+  @override
+  String get youMayCross => 'You may cross';
+
+  @override
+  String get takeAnotherRoute => 'Take another route';
+
+  @override
+  String get noDataYet => 'Could not load the schedule';
+
+  @override
+  String nextClosureIn(String duration) {
+    return 'Next closure in $duration';
+  }
+
+  @override
+  String reopensIn(String duration) {
+    return 'Reopens in $duration';
+  }
+
+  @override
+  String reopensAt(String time) {
+    return 'Reopens at $time';
+  }
+
+  @override
+  String get noUpcomingClosures => 'No closures scheduled';
+
+  @override
+  String closureWindow(String start, String end) {
+    return '$start > $end';
+  }
+
+  @override
+  String durationDay(int value) {
+    return '${value}d';
+  }
+
+  @override
+  String durationHour(int value) {
+    return '${value}h';
+  }
+
+  @override
+  String durationMinute(int value) {
+    return '${value}m';
+  }
+
+  @override
+  String get durationLessThanAMinute => 'under a minute';
+
+  @override
+  String get tabStatus => 'STATUS';
+
+  @override
+  String get tabSchedule => 'LIST';
+
+  @override
+  String get tabAlerts => 'ALERTS';
+
+  @override
+  String get tabInfo => 'INFO';
+
+  @override
+  String get scheduleTitle => 'Next lifts';
+
+  @override
+  String get scheduleEmpty =>
+      'Nothing scheduled. The feed has no closures left.';
+
+  @override
+  String get maintenanceLabel => 'Maintenance';
+
+  @override
+  String get todayLabel => 'Today';
+
+  @override
+  String get tomorrowLabel => 'Tomorrow';
+
+  @override
+  String get overnightNote => 'overnight';
+
+  @override
+  String durationLabel(String duration) {
+    return '$duration closed';
+  }
+
+  @override
+  String get inProgress => 'IN PROGRESS';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get loading => 'Loading…';
+
+  @override
+  String updatedAt(String time) {
+    return 'Updated $time';
+  }
+
+  @override
+  String offlineStale(String time) {
+    return 'Offline — showing data from $time';
+  }
+
+  @override
+  String get refreshFailed => 'Could not refresh. Showing saved data.';
+
+  @override
+  String get alertsTitle => 'Alerts';
+
+  @override
+  String get alertsUnavailableOnWeb =>
+      'Alerts need the phone app. The web version cannot schedule reminders.';
+
+  @override
+  String get alertsLeadTime => 'Warn me before a closure';
+
+  @override
+  String get infoTitle => 'Info';
+
+  @override
+  String get infoWhat =>
+      'The Chaban-Delmas bridge lifts to let tall ships up the Garonne. When it does, the road is closed for around an hour and the detour is long. This app tells you whether you can cross.';
+
+  @override
+  String get infoForecastCaveat =>
+      'These are forecasts published by Bordeaux Métropole, not a live sensor. Times can move, and a lift can be cancelled. Check before relying on it.';
+
+  @override
+  String get infoTimesInParis =>
+      'All times are Bordeaux local time (Europe/Paris).';
+
+  @override
+  String get infoDataSource => 'Data source';
+
+  @override
+  String get infoLicence => 'Licence';
+
+  @override
+  String get infoOpenSourcePage => 'Open the dataset page';
+}

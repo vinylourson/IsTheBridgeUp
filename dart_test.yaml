@@ -1,0 +1,12 @@
+tags:
+  # Hits the real Bordeaux Métropole API. Runs by default; exclude it in
+  # offline or sandboxed environments:
+  #   flutter test --exclude-tags live
+  live:
+    timeout: 60s
+
+  # Pixel-exact screenshots. Font rasterisation differs between platforms, so
+  # these are only meaningful on the machine that generated them. CI runs:
+  #   flutter test --exclude-tags golden
+  golden:
+    timeout: 60s
