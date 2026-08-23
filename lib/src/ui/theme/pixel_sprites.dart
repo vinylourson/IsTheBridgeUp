@@ -61,6 +61,42 @@ class PixelSprites {
     '....lll......lll....',
   ];
 
+  /// 11x14
+  static const List<String> pedestrianA = <String>[
+    '....lll....',
+    '....lWl....',
+    '....lll....',
+    '...lllll...',
+    '...lllll.l.',
+    '...llllll..',
+    '..l.lll....',
+    '.l..lll....',
+    '....lll....',
+    '....l.l....',
+    '...l...l...',
+    '...l...l...',
+    '..l.....l..',
+    '.lll...lll.',
+  ];
+
+  /// 11x14
+  static const List<String> pedestrianB = <String>[
+    '....lll....',
+    '....lWl....',
+    '....lll....',
+    '...lllll...',
+    '...lllll...',
+    '...lllll...',
+    '...lllll...',
+    '..l.lll.l..',
+    '..l.lll.l..',
+    '....l.l....',
+    '....l.l....',
+    '....l.l....',
+    '....l.l....',
+    '...ll.ll...',
+  ];
+
   /// 44x17
   static const List<String> ship = <String>[
     '............................................',

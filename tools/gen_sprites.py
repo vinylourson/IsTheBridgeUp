@@ -102,6 +102,34 @@ def cone():
     g.rect(0,13,12,14,'K',fill=True); g.rect(1,13,11,13,'d',fill=True)
     return g
 
+def pedestrian(frame=0, O='l', A='W'):
+    """A walker, in two frames so the legs actually move.
+
+    Frame 0 is mid-stride, frame 1 is legs passing. The scene alternates them
+    by distance travelled, so the cycle stays in step with the walking speed
+    instead of drifting against it.
+    """
+    g = G(11, 14)
+    g.rect(4, 0, 6, 2, O, fill=True)          # head
+    g.put(5, 1, A)                            # face
+    g.rect(3, 3, 7, 4, O, fill=True)          # shoulders, sat on the head
+    g.rect(4, 5, 6, 8, O, fill=True)          # torso
+    if frame == 0:
+        g.line(3, 5, 1, 7, O)                 # arms swinging
+        g.line(7, 5, 9, 4, O)
+        g.line(4, 9, 2, 12, O)                # legs striding
+        g.line(6, 9, 8, 12, O)
+        g.rect(1, 13, 3, 13, O, fill=True)    # feet
+        g.rect(7, 13, 9, 13, O, fill=True)
+    else:
+        g.line(3, 5, 2, 8, O)                 # arms close in
+        g.line(7, 5, 8, 8, O)
+        g.line(4, 9, 4, 12, O)                # legs together
+        g.line(6, 9, 6, 12, O)
+        g.rect(3, 13, 4, 13, O, fill=True)
+        g.rect(6, 13, 7, 13, O, fill=True)
+    return g
+
 def water():
     g=G(16,5)
     for y in range(5):
@@ -113,6 +141,7 @@ def water():
     return g
 
 SPRITES=[('bicycle',bicycle()),('moto',moto()),('car',car()),
+         ('pedestrianA',pedestrian(0)),('pedestrianB',pedestrian(1)),
          ('ship',ship()),('cone',cone()),('water',water())]
 
 def preview(path,scale=7):
