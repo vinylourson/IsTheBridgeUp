@@ -1,0 +1,80 @@
+import 'dart:ui' show Color;
+
+/// The 16 colours of the Commodore 64, in Philip "Pepto" Timmermann's
+/// widely-used calibration of the VIC-II output.
+///
+/// Sticking to a real hardware palette is what keeps the app looking like one
+/// machine rather than a pile of retro-ish choices.
+class C64 {
+  const C64._();
+
+  static const Color black = Color(0xFF000000);
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color red = Color(0xFF68372B);
+  static const Color cyan = Color(0xFF70A4B2);
+  static const Color purple = Color(0xFF6F3D86);
+  static const Color green = Color(0xFF588D43);
+  static const Color blue = Color(0xFF352879);
+  static const Color yellow = Color(0xFFB8C76F);
+  static const Color orange = Color(0xFF6F4F25);
+  static const Color brown = Color(0xFF433900);
+  static const Color lightRed = Color(0xFF9A6759);
+  static const Color darkGrey = Color(0xFF444444);
+  static const Color grey = Color(0xFF6C6C6C);
+  static const Color lightGreen = Color(0xFF9AD284);
+  static const Color lightBlue = Color(0xFF6C5EB5);
+  static const Color lightGrey = Color(0xFF959595);
+}
+
+/// Semantic roles for the palette, plus the sprite character map.
+class PixelPalette {
+  const PixelPalette._();
+
+  // Surfaces
+  static const Color background = C64.black;
+  static const Color panel = Color(0xFF14141C);
+  static const Color panelBorder = C64.grey;
+  static const Color panelBorderBright = C64.lightGrey;
+
+  // Text
+  static const Color ink = C64.white;
+  static const Color inkDim = C64.lightGrey;
+  static const Color inkFaint = C64.grey;
+
+  // Verdicts
+  static const Color open = C64.lightGreen;
+  static const Color openDeep = C64.green;
+  static const Color closed = C64.lightRed;
+  static const Color closedDeep = C64.red;
+  static const Color warning = C64.yellow;
+
+  // Scene
+  static const Color water = C64.blue;
+  static const Color waterCrest = C64.lightBlue;
+  static const Color waterFoam = C64.cyan;
+  static const Color structure = C64.lightGrey;
+  static const Color structureBright = C64.white;
+  static const Color pier = C64.darkGrey;
+  static const Color roadLine = C64.yellow;
+
+  /// Maps sprite-matrix characters to colours. '.' is transparent and is
+  /// handled by the painter, so it is absent here.
+  static const Map<String, Color> charToColor = <String, Color>{
+    'K': C64.black,
+    'W': C64.white,
+    'r': C64.red,
+    'R': C64.lightRed,
+    'c': C64.cyan,
+    'p': C64.purple,
+    'g': C64.green,
+    'G': C64.lightGreen,
+    'b': C64.blue,
+    'B': C64.lightBlue,
+    'y': C64.yellow,
+    'o': C64.orange,
+    'n': C64.brown,
+    'd': C64.darkGrey,
+    'm': C64.grey,
+    'l': C64.lightGrey,
+  };
+}
