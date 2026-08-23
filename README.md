@@ -108,7 +108,15 @@ code, crisp at any DPI, and need no binary assets. Re-run after editing:
 
 ```bash
 python3 tools/gen_sprites.py     # rewrites pixel_sprites.dart + a preview PNG
+python3 tools/gen_icons.py       # rewrites the favicon and PWA icons
 ```
+
+The icons are drawn on the same 32x32 grid and scaled by whole numbers only, so
+the pixels stay square. Maskable variants are **padded**, not resampled —
+shrinking 32px to 24 is not an integer ratio and duplicates rows unevenly, which
+is the exact mush pixel art exists to avoid. Unlike the sprites, the icons are
+not staleness-checked in CI: they are PNGs, and zlib output can differ between
+Python versions.
 
 Type is `Press Start 2P` (chrome, labels, tabs) and `Silkscreen` (content and
 the verdict), both OFL and bundled.
