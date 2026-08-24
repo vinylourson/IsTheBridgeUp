@@ -9,132 +9,229 @@
 class PixelSprites {
   const PixelSprites._();
 
-  /// 23x14
-  static const List<String> bicycle = <String>[
-    '.......................',
-    '.......................',
-    '.............llllll....',
-    '.......WWW.....l.......',
-    '........llllllll.......',
-    '....llll.l....lllll....',
-    '..ll...lll...llll..ll..',
-    '..l...l.l.l..ll.l...l..',
-    '.l....l..ll.ll...l...l.',
-    '.l...Wllllll.l...W...l.',
-    '.l.......l...l.......l.',
-    '..l.....l.....l.....l..',
-    '..ll...ll.....ll...ll..',
-    '....lll.........lll....',
-  ];
-
-  /// 23x14
-  static const List<String> moto = <String>[
-    '.......................',
-    '.......................',
-    '...............lllll...',
-    '....llllllllllll.......',
-    '....lllllyyyyyll.......',
-    '....lllllllllllllll....',
-    '..ll..lrrrrrrrlll..ll..',
-    '..l.ddlrrrrrrrl.dld.l..',
-    '.l.dddllllllllllddld.l.',
-    '.l.ddddd.l...l.dlldd.l.',
-    '.l.ddddd.l...l.ddddd.l.',
-    '..l.ddd.l.....l.ddd.l..',
-    '..ll...ll.....ll...ll..',
-    '....lll.........lll....',
-  ];
-
-  /// 20x12
-  static const List<String> car = <String>[
-    '....................',
-    '....lllllllllll.....',
-    '....lcccclccccl.....',
-    '....lcccclccccl.....',
-    '.llllllllllllllllll.',
-    '.lrrrrrrrrrrrrrrrrl.',
-    '.yRRRRRRRRRRRRRRRRR.',
-    '.lRRlllRRRRRRlllRRl.',
-    '.lllldlllllllldllll.',
-    '...ldddl....ldddl...',
-    '...l.d.l....l.d.l...',
-    '....lll......lll....',
-  ];
-
-  /// 11x14
-  static const List<String> pedestrianA = <String>[
+  /// 11x15
+  static const List<String> walk0 = <String>[
     '....lll....',
     '....lWl....',
     '....lll....',
     '...lllll...',
-    '...lllll.l.',
-    '...llllll..',
-    '..l.lll....',
-    '.l..lll....',
-    '....lll....',
-    '....l.l....',
-    '...l...l...',
-    '...l...l...',
-    '..l.....l..',
-    '.lll...lll.',
+    '...llmll...',
+    '....lml....',
+    '....lml....',
+    '....lml....',
+    '....lmm....',
+    '...l.mlm...',
+    '.....ml....',
+    '.....ml....',
+    '....mml....',
+    '...m.lll...',
+    '..mmm.lll..',
   ];
 
-  /// 11x14
-  static const List<String> pedestrianB = <String>[
+  /// 11x15
+  static const List<String> walk1 = <String>[
     '....lll....',
     '....lWl....',
     '....lll....',
     '...lllll...',
-    '...lllll...',
-    '...lllll...',
-    '...lllll...',
-    '..l.lll.l..',
-    '..l.lll.l..',
-    '....l.l....',
-    '....l.l....',
-    '....l.l....',
-    '....l.l....',
-    '...ll.ll...',
+    '...llmll...',
+    '....llm....',
+    '....llm....',
+    '...llllm...',
+    '...lmmmm...',
+    '...l.mlm...',
+    '....m.ll...',
+    '....m.ll...',
+    '...m...ll..',
+    '...m...l...',
+    '..mmm.lll..',
   ];
 
-  /// 44x17
+  /// 11x15
+  static const List<String> walk2 = <String>[
+    '....lll....',
+    '....lWl....',
+    '....lll....',
+    '...lllll...',
+    '...llmll...',
+    '....lml....',
+    '....lml....',
+    '....lml....',
+    '....mml....',
+    '...m.mll...',
+    '.....ml....',
+    '.....ml....',
+    '....lmm....',
+    '...lll.m...',
+    '..lll.mmm..',
+  ];
+
+  /// 11x15
+  static const List<String> walk3 = <String>[
+    '....lll....',
+    '....lWl....',
+    '....lll....',
+    '...lllll...',
+    '...llmll...',
+    '....mll....',
+    '....mll....',
+    '...mllll...',
+    '...mmmml...',
+    '...m.mll...',
+    '....llm....',
+    '....llm....',
+    '...ll..m...',
+    '...l...m...',
+    '..lll.mmm..',
+  ];
+
+  /// 17x16
+  static const List<String> cyclist0 = <String>[
+    '.................',
+    '.........lW......',
+    '.........ll......',
+    '.........ll......',
+    '........llm......',
+    '.......ll..mll...',
+    '.....lml..lll....',
+    '......mlll.ll....',
+    '......lml..ll....',
+    '...mml.m.llmlm...',
+    '..m..lmm.lm.l.m..',
+    '.m..l.mmlll.l..m.',
+    '.m..llmllml.l..m.',
+    '.m.....m.m.....m.',
+    '..m...m...m...m..',
+    '...mmm.....mmm...',
+  ];
+
+  /// 17x16
+  static const List<String> cyclist1 = <String>[
+    '.................',
+    '.........lW......',
+    '.........ll......',
+    '.........ll......',
+    '........llm......',
+    '.......ll..mll...',
+    '.....lml..lll....',
+    '......lmll.ll....',
+    '......llm..ll....',
+    '...mml.l.mlmlm...',
+    '..m..lml.mm.l.m..',
+    '.m..l.lmllm.l..m.',
+    '.m..lllllmm.l..m.',
+    '.m.....m.m.....m.',
+    '..m...m...m...m..',
+    '...mmm.....mmm...',
+  ];
+
+  /// 18x15
+  static const List<String> moto0 = <String>[
+    '..................',
+    '.........lW.......',
+    '.........ll.......',
+    '.........ll.......',
+    '.......lllmm......',
+    '......ll...lml....',
+    '...lllml..........',
+    '...lllmlrr.l......',
+    '...mlrrmrrlllmm...',
+    '..m.lllmlllll..m..',
+    '.m..llllmlll.l..m.',
+    '.m.mmm.m..m.mmm.m.',
+    '.m..m..m..m..m..m.',
+    '..m...m....m...m..',
+    '...mmm......mmm...',
+  ];
+
+  /// 18x15
+  static const List<String> moto1 = <String>[
+    '..................',
+    '.........lW.......',
+    '.........ll.......',
+    '.........ll.......',
+    '.......lllmm......',
+    '......ll...lml....',
+    '...lllml..........',
+    '...lllmlrr.l......',
+    '...mlrrmrrlllmm...',
+    '..m.lllmlllll..m..',
+    '.m..llllmlll.l..m.',
+    '.m.mmm.m..m.mmm.m.',
+    '.m..m..m..m..m..m.',
+    '..m...m....m...m..',
+    '...mmm......mmm...',
+  ];
+
+  /// 36x13
+  static const List<String> car0 = <String>[
+    '....................................',
+    '..........llllllllllllllll..........',
+    '..........lcccccclcccccccl..........',
+    '..........lcccccclcccccccl..........',
+    '..........lcccccclcccccccl..........',
+    '.llllllllllllllllllllllllllllllllll.',
+    '.lRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRl.',
+    '.yRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR.',
+    '.lRRRRRlllRRRRRRRRRRRRRRRRlllRRRRRl.',
+    '.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.',
+    '......l..ml..............l..ml......',
+    '......l...l..............l...l......',
+    '.......lll................lll.......',
+  ];
+
+  /// 36x13
+  static const List<String> car1 = <String>[
+    '....................................',
+    '..........llllllllllllllll..........',
+    '..........lcccccclcccccccl..........',
+    '..........lcccccclcccccccl..........',
+    '..........lcccccclcccccccl..........',
+    '.llllllllllllllllllllllllllllllllll.',
+    '.lRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRl.',
+    '.yRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR.',
+    '.lRRRRRlllRRRRRRRRRRRRRRRRlllRRRRRl.',
+    '.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.',
+    '......lm..l..............lm..l......',
+    '......l...l..............l...l......',
+    '.......lll................lll.......',
+  ];
+
+  /// 58x20
   static const List<String> ship = <String>[
-    '............................................',
-    '............WWWWW.......WWWWW...............',
-    '............WrrrW.......WrrrW...............',
-    '............WrrrW.......WrrrW...............',
-    '.....WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW.......',
-    '.....WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW.......',
-    '.....WWWbbWbbWbbWbbWbbWbbWbbWbbWbbWWWWWWW...',
-    '.....WWWbbWbbWbbWbbWbbWbbWbbWbbWbbWWWWccW...',
-    '.....WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWccW...',
-    '.....WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW...',
-    '.W.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW...',
-    '..WWrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr...',
-    '...rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr...',
-    '...rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr...',
-    '...rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr...',
-    '......nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn......',
-    '............................................',
+    '..........................................................',
+    '................WWWWW.........WWWWW.......................',
+    '................WrrrW.........WrrrW.......................',
+    '................WrrrW.........WrrrW.......................',
+    '................WrrrW.........WrrrW.......................',
+    '......WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW.........',
+    '......WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW.........',
+    '......WWWbbWbbWbbWbbWbbWbbWbbWbbWbbWbbWbbWbbWWWWWWWWWWW...',
+    '......WWWbbWbbWbbWbbWbbWbbWbbWbbWbbWbbWbbWbbWWWWWWccccW...',
+    '......WWWbbWbbWbbWbbWbbWbbWbbWbbWbbWbbWbbWbbWWWWWWccccW...',
+    '......WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWccccW...',
+    '......WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW...',
+    '.WW.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW..',
+    '...WWrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr..',
+    '....rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr..',
+    '....rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr..',
+    '....rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr..',
+    '....rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr..',
+    '.......nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn.....',
+    '..........................................................',
   ];
 
-  /// 13x15
+  /// 7x9
   static const List<String> cone = <String>[
-    '.............',
-    '.............',
-    '......K......',
-    '.....KRK.....',
-    '.....KRK.....',
-    '....KRRRK....',
-    '....KWWWK....',
-    '...KWWWWWK...',
-    '...KRRRRRK...',
-    '..KRRRRRRRK..',
-    '..KWWWWWWWK..',
-    '.KWWWWWWWWWK.',
-    '.KRRRRRRRRRK.',
-    'KdddddddddddK',
-    'KKKKKKKKKKKKK',
+    '.......',
+    '.......',
+    '...K...',
+    '..KRK..',
+    '..KWK..',
+    '.KRRRK.',
+    '.KWWWK.',
+    'KdddddK',
+    'KKKKKKK',
   ];
 
   /// 16x5
