@@ -1,7 +1,13 @@
-"""Generates the favicon and PWA icons as pixel art.
+"""Generates the launcher icons and a wordmark from a 24x24 pixel design.
 
-Designed on a 32x32 grid and scaled by whole-number factors only (32 -> 192 is
-x6, 32 -> 512 is x16), so the pixels stay perfectly square with no resampling.
+24 was chosen because it divides every Android launcher density exactly
+(48=x2, 72=x3, 96=x4, 144=x6, 192=x8), so each source pixel stays a perfect
+square. A 32-grid would have needed fractional scaling at 48 and 144, which
+makes pixel art look like a mistake.
+
+The palette is sampled from the reference logo (a pixelated photo of the
+bridge with its span raised), not invented: daylight azure sky, warm stone
+towers, red aviation bands, Garonne blue below.
 
 Run: python3 tools/gen_icons.py
 """
@@ -9,106 +15,247 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gen_sprites import G, PAL  # noqa: E402
+from gen_sprites import G  # noqa: E402  (drawing primitives)
 from pngw import write_png  # noqa: E402
 
-SIZE = 32
-WATER_Y = 25
-DECK_Y = 22
-LT = (6, 9)
-RT = (22, 25)
-SPAN = (10, 21)
-BEAM_Y = 7
+SIZE = 24
+
+# Sampled from the reference logo, then nudged for contrast at 48px.
+PAL = {
+    'S': (0x45, 0x91, 0xEA),   # sky, azure
+    'H': (0x8F, 0xBC, 0xE8),   # sky near the horizon
+    'W': (0xEA, 0xF2, 0xFC),   # cloud
+    'T': (0xDC, 0xD9, 0xC6),   # tower stone, lit face
+    'D': (0xA8, 0xA5, 0x94),   # tower stone, shaded face
+    'G': (0x3C, 0x5A, 0x78),   # glazed strip up the pylons
+    'R': (0xD2, 0x40, 0x2F),   # aviation band
+    'P': (0x9C, 0x87, 0x60),   # deck / pier
+    'K': (0x6E, 0x5C, 0x40),   # skyline
+    'B': (0x2F, 0x56, 0x86),   # water
+    'L': (0x4A, 0x79, 0xAE),   # water highlight
+}
+
+DECK_Y = 18
+WATER_Y = 19
+TOWER_TOP = 2
+TOWER_A = (7, 8)
+TOWER_B = (15, 16)
+SPAN = (9, 14)
+SPAN_Y = 5
 
 
 def icon():
-    """The bridge with its span raised and a ship passing under: the whole
-    point of the app in one silhouette."""
+    """Two lift towers with the span raised, and clear sky in the gap beneath.
+
+    That gap is the whole message -- it is what says a ship can get through
+    and you cannot. Everything else is trimmed to keep it readable at 48px:
+    no skyline, no horizon gradient, towers only two pixels wide.
+    """
     g = G(SIZE, SIZE)
+
+    # Flat sky. A horizon gradient just muddled things at this size.
     for y in range(SIZE):
         for x in range(SIZE):
-            g.put(x, y, 'K')
+            g.put(x, y, 'S')
+
+    # A few clouds, kept clear of the towers and the span.
+    for cx, cy in ((1, 9), (19, 4), (20, 14)):
+        g.rect(cx, cy, cx + 2, cy, 'W', fill=True)
+        g.put(cx + 1, cy - 1, 'W')
 
     # Water.
     for y in range(WATER_Y, SIZE):
         for x in range(SIZE):
-            g.put(x, y, 'b')
-    for x in range(0, SIZE, 4):
-        g.put(x, WATER_Y, 'B')
-        g.put(x + 2, WATER_Y + 2, 'B')
-        g.put(x + 1, WATER_Y + 4, 'B')
+            g.put(x, y, 'B')
+    # Scattered single-pixel glints, not 2px blocks in rows -- blocks read as
+    # brickwork at this size rather than water.
+    for x in range(0, SIZE, 2):
+        g.put(x, WATER_Y, 'L')
+    for x, y in ((1, 20), (6, 21), (11, 20), (13, 22), (18, 21), (22, 20), (4, 23), (20, 23)):
+        g.put(x, y, 'L')
 
-    # Ship, drawn before the structure so the piers overlap it.
-    g.rect(12, 22, 20, 24, 'r', fill=True)
-    g.rect(13, 20, 19, 21, 'W', fill=True)
-    g.put(15, 19, 'r')
-    g.put(17, 19, 'r')
+    # Approach decks -- deliberately NOT across the middle: the span is up.
+    for a, b in ((0, TOWER_A[0] - 1), (TOWER_B[1] + 1, SIZE - 1)):
+        g.rect(a, DECK_Y, b, DECK_Y, 'P', fill=True)
+        g.rect(a, DECK_Y - 1, b, DECK_Y - 1, 'T', fill=True)
 
-    # Approach decks.
-    for a, b in ((0, LT[0] - 1), (RT[1] + 1, SIZE - 1)):
-        g.rect(a, DECK_Y, b, DECK_Y + 1, 'm', fill=True)
-        g.rect(a, DECK_Y, b, DECK_Y, 'l', fill=True)
+    # The raised span, bridging the gap between the towers near the top.
+    g.rect(SPAN[0], SPAN_Y, SPAN[1], SPAN_Y, 'T', fill=True)
+    g.rect(SPAN[0], SPAN_Y + 1, SPAN[1], SPAN_Y + 1, 'D', fill=True)
 
-    # Piers and towers.
-    for x0, x1 in (LT, RT):
-        g.rect(x0, DECK_Y, x1, SIZE - 1, 'd', fill=True)
-        g.rect(x0, 2, x1, DECK_Y, 'l', fill=True)
-        g.rect(x0 + 1, 3, x1 - 1, DECK_Y - 1, 'W', fill=True)
-        g.rect(x0 - 1, BEAM_Y, x1 + 1, BEAM_Y + 1, 'l', fill=True)
-
-    # Cables down to the raised span.
-    for cx in (LT[0] + 1, RT[0] + 1):
-        g.rect(cx, 4, cx, 10, 'l', fill=True)
-
-    # The lift span, up.
-    g.rect(SPAN[0], 10, SPAN[1], 12, 'm', fill=True)
-    g.rect(SPAN[0], 10, SPAN[1], 10, 'l', fill=True)
+    # Towers, in front of everything, two pixels wide so they stay slender.
+    for x0, x1 in (TOWER_A, TOWER_B):
+        g.rect(x0, TOWER_TOP, x1, SIZE - 1, 'T', fill=True)
+        g.rect(x1, TOWER_TOP, x1, SIZE - 1, 'G', fill=True)   # glazed strip
+        g.rect(x0, DECK_Y + 1, x1, SIZE - 1, 'D', fill=True)  # pier into water
+        g.rect(x0, 12, x1, 12, 'R', fill=True)                # aviation band
     return g
 
 
-def render(grid, scale, maskable=False):
-    """Scales the art by a whole number and centres it on a canvas of
-    `SIZE * scale`.
+# ---- 5x7 pixel font, only the glyphs the wordmark needs ----
+FONT = {
+    'I': ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '#####'],
+    'S': ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
+    'T': ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
+    'H': ['#...#', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+    'E': ['#####', '#....', '#....', '####.', '#....', '#....', '#####'],
+    'B': ['####.', '#...#', '#...#', '####.', '#...#', '#...#', '####.'],
+    'R': ['####.', '#...#', '#...#', '####.', '#..#.', '#...#', '#...#'],
+    'D': ['####.', '#...#', '#...#', '#...#', '#...#', '#...#', '####.'],
+    'G': ['.###.', '#...#', '#....', '#..##', '#...#', '#...#', '.###.'],
+    'U': ['#...#', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
+    'P': ['####.', '#...#', '#...#', '####.', '#....', '#....', '#....'],
+    '?': ['.###.', '#...#', '....#', '..##.', '..#..', '.....', '..#..'],
+    ' ': ['.....', '.....', '.....', '.....', '.....', '.....', '.....'],
+}
 
-    Maskable icons are padded rather than resampled: shrinking a 32px grid to
-    24 is not an integer ratio and duplicates rows unevenly, which is exactly
-    the mush pixel art is supposed to avoid. Instead the art is scaled by a
-    smaller whole number and centred, keeping every pixel square. The result
-    occupies 75% of the canvas, inside the 80% maskable safe zone.
+
+def render(grid, scale, pad_to=None):
+    """Integer-scales the grid; pads with sky so any remainder is invisible."""
+    rows = grid.rows()
+    art = SIZE * scale
+    canvas = pad_to or art
+    off = (canvas - art) // 2
+    bg = PAL['S']
+    out = [[bg] * canvas for _ in range(canvas)]
+    for y in range(SIZE):
+        for x in range(SIZE):
+            c = PAL[rows[y][x]]
+            for dy in range(scale):
+                r = out[off + y * scale + dy]
+                s = off + x * scale
+                r[s:s + scale] = [c] * scale
+    return out
+
+
+def render_foreground(grid, scale, canvas):
+    """Adaptive-icon foreground: the art centred on a transparent canvas.
+
+    Android composites this over a separate background layer and may mask
+    anything outside the inner 72dp of the 108dp canvas, so the art is kept
+    within that safe zone. Sky pixels become transparent because the
+    background layer supplies the same azure.
     """
     rows = grid.rows()
-    canvas_px = SIZE * scale
-    art_scale = max(1, int(scale * 0.75)) if maskable else scale
-    art_px = SIZE * art_scale
-    offset = (canvas_px - art_px) // 2
-
-    black = PAL['K']
-    out = [[black] * canvas_px for _ in range(canvas_px)]
+    art = SIZE * scale
+    off = (canvas - art) // 2
+    clear = (0, 0, 0, 0)
+    out = [[clear] * canvas for _ in range(canvas)]
     for y in range(SIZE):
         for x in range(SIZE):
             ch = rows[y][x]
-            color = black if ch == '.' else PAL[ch]
-            for dy in range(art_scale):
-                row = out[offset + y * art_scale + dy]
-                start = offset + x * art_scale
-                row[start:start + art_scale] = [color] * art_scale
+            if ch == 'S':          # sky -> let the background layer show
+                continue
+            r, g, b = PAL[ch]
+            for dy in range(scale):
+                row = out[off + y * scale + dy]
+                start = off + x * scale
+                row[start:start + scale] = [(r, g, b, 255)] * scale
+    return out
+
+
+def wordmark(scale=8, text='IS THE BRIDGE UP?'):
+    """Icon beside the app name, for the README and store listings.
+
+    The launcher icons carry no text on purpose: at 48px it would be
+    illegible, and both Apple and Google advise against words in app icons.
+    """
+    art = render(icon(), scale)
+    gap = 4 * scale
+    glyph_w, glyph_h = 5, 7
+    tracking = 1
+    text_w = len(text) * (glyph_w + tracking) * scale
+    W = len(art) + gap + text_w + gap
+    H = len(art)
+    bg = PAL['S']
+    out = [[bg] * W for _ in range(H)]
+    for y, row in enumerate(art):
+        out[y][0:len(row)] = row
+
+    baseline = (H - glyph_h * scale) // 2
+    x0 = len(art) + gap
+    ink = PAL['W']
+    shadow = PAL['G']
+    for ch in text:
+        rows = FONT.get(ch, FONT[' '])
+        for gy in range(glyph_h):
+            for gx in range(glyph_w):
+                if rows[gy][gx] != '#':
+                    continue
+                for dy in range(scale):
+                    for dx in range(scale):
+                        py = baseline + gy * scale + dy
+                        px_ = x0 + gx * scale + dx
+                        if 0 <= py < H and px_ + scale < W:
+                            out[py + scale][px_ + scale] = shadow
+                for dy in range(scale):
+                    r = out[baseline + gy * scale + dy]
+                    s = x0 + gx * scale
+                    r[s:s + scale] = [ink] * scale
+        x0 += (glyph_w + tracking) * scale
     return out
 
 
 if __name__ == '__main__':
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     grid = icon()
+
     targets = [
-        ('web/favicon.png', 1, False),
-        ('web/icons/Icon-192.png', 6, False),
-        ('web/icons/Icon-512.png', 16, False),
-        ('web/icons/Icon-maskable-192.png', 6, True),
-        ('web/icons/Icon-maskable-512.png', 16, True),
+        # Android launcher densities -- all exact multiples of 24.
+        ('android/app/src/main/res/mipmap-mdpi/ic_launcher.png', 2, None),
+        ('android/app/src/main/res/mipmap-hdpi/ic_launcher.png', 3, None),
+        ('android/app/src/main/res/mipmap-xhdpi/ic_launcher.png', 4, None),
+        ('android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png', 6, None),
+        ('android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png', 8, None),
+        # iOS wants a single 1024; 24x42=1008 padded with sky to 1024.
+        ('ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png', 42, 1024),
+        # Web / PWA.
+        ('web/favicon.png', 2, None),
+        ('web/icons/Icon-192.png', 8, None),
+        ('web/icons/Icon-512.png', 21, 512),
+        ('web/icons/Icon-maskable-192.png', 6, 192),
+        ('web/icons/Icon-maskable-512.png', 16, 512),
     ]
-    for rel, scale, maskable in targets:
+    for rel, scale, pad in targets:
         path = os.path.join(root, rel)
-        write_png(path, render(grid, scale, maskable))
-        note = ' (maskable, padded)' if maskable else ''
-        print(f'  {rel:38} {SIZE * scale}x{SIZE * scale}{note}')
-    write_png(os.path.join(root, 'tools/icon_preview.png'), render(grid, 8, False))
-    print('  tools/icon_preview.png                 preview')
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        write_png(path, render(grid, scale, pad))
+        px = pad or SIZE * scale
+        print(f'  {rel:74} {px}x{px}')
+
+    # Android adaptive icons (API 26+, i.e. every current device). A legacy
+    # PNG alone gets shrunk and letterboxed by modern launchers.
+    # Canvas is 108dp; art is kept inside the guaranteed-visible inner 72dp.
+    adaptive = [('mdpi', 108, 3), ('hdpi', 162, 4), ('xhdpi', 216, 6),
+                ('xxhdpi', 324, 9), ('xxxhdpi', 432, 12)]
+    for density, canvas, scale in adaptive:
+        rel = f'android/app/src/main/res/mipmap-{density}/ic_launcher_foreground.png'
+        path = os.path.join(root, rel)
+        write_png(path, render_foreground(grid, scale, canvas))
+        inner = SIZE * scale
+        print(f'  {rel:74} {canvas}x{canvas} (art {inner}px, {inner * 100 // canvas}%)')
+
+    anydpi = os.path.join(root, 'android/app/src/main/res/mipmap-anydpi-v26')
+    os.makedirs(anydpi, exist_ok=True)
+    with open(os.path.join(anydpi, 'ic_launcher.xml'), 'w') as fh:
+        fh.write('''<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED by tools/gen_icons.py -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>
+''')
+    sky = '#%02X%02X%02X' % PAL['S']
+    colours = os.path.join(root, 'android/app/src/main/res/values/ic_launcher_background.xml')
+    with open(colours, 'w') as fh:
+        fh.write(f'''<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED by tools/gen_icons.py -->
+<resources>
+    <color name="ic_launcher_background">{sky}</color>
+</resources>
+''')
+    print('  android/.../mipmap-anydpi-v26/ic_launcher.xml + values/ic_launcher_background.xml')
+
+    write_png(os.path.join(root, 'tools/icon_preview.png'), render(grid, 14))
+    write_png(os.path.join(root, 'docs/wordmark.png'), wordmark())
+    print('  tools/icon_preview.png (gitignored), docs/wordmark.png')
