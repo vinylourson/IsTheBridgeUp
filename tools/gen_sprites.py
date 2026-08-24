@@ -4,14 +4,37 @@ import math
 from pngw import write_png
 
 PAL = {
- 'K':(0x00,0x00,0x00), 'W':(0xFF,0xFF,0xFF),
- 'r':(0x68,0x37,0x2B), 'R':(0x9A,0x67,0x59),
- 'c':(0x70,0xA4,0xB2), 'p':(0x6F,0x3D,0x86),
- 'g':(0x58,0x8D,0x43), 'G':(0x9A,0xD2,0x84),
- 'b':(0x35,0x28,0x79), 'B':(0x6C,0x5E,0xB5),
- 'y':(0xB8,0xC7,0x6F), 'o':(0x6F,0x4F,0x25),
- 'n':(0x43,0x39,0x00), 'd':(0x44,0x44,0x44),
- 'm':(0x6C,0x6C,0x6C), 'l':(0x95,0x95,0x95),
+    # --- C64 (Pepto), used for the bridge, water and chrome ---
+    'K': (0x00, 0x00, 0x00), 'W': (0xFF, 0xFF, 0xFF),
+    'r': (0x68, 0x37, 0x2B), 'R': (0x9A, 0x67, 0x59),
+    'c': (0x70, 0xA4, 0xB2), 'p': (0x6F, 0x3D, 0x86),
+    'g': (0x58, 0x8D, 0x43), 'G': (0x9A, 0xD2, 0x84),
+    'b': (0x35, 0x28, 0x79), 'B': (0x6C, 0x5E, 0xB5),
+    'y': (0xB8, 0xC7, 0x6F), 'o': (0x6F, 0x4F, 0x25),
+    'n': (0x43, 0x39, 0x00), 'd': (0x44, 0x44, 0x44),
+    'm': (0x6C, 0x6C, 0x6C), 'l': (0x95, 0x95, 0x95),
+
+    # --- People, sampled from the reference character sheet ---
+    # The C64 palette has no usable pink, teal or skin tone, so the cast
+    # brings its own colours. The bridge itself stays on C64.
+    '1': (0xF2, 0xC9, 0xA0),   # skin, light
+    '2': (0xFD, 0xC2, 0x93),   # skin, light warm
+    '3': (0x95, 0x4D, 0x2B),   # skin, dark
+    '4': (0xE8, 0xB4, 0x8E),   # skin, medium
+    '5': (0x5A, 0x30, 0x1D),   # hair, brown
+    '6': (0xE2, 0x99, 0x37),   # hair, blonde
+    '7': (0xA4, 0x41, 0x1B),   # hair, ginger
+    '8': (0x2A, 0x23, 0x20),   # hair, black
+    'A': (0x2A, 0x5C, 0x9E),   # top, blue
+    'P': (0xEA, 0x72, 0x89),   # top, pink
+    'V': (0x8B, 0x5C, 0xAE),   # top, purple
+    'T': (0x4A, 0xB1, 0xAB),   # top, teal
+    'Y': (0xF3, 0xB6, 0x2F),   # top, yellow
+    'E': (0x4E, 0x9E, 0x4A),   # top, green
+    'F': (0xF2, 0xEC, 0xE6),   # off-white, shirts and trainers
+    'J': (0x36, 0x50, 0x6E),   # jeans
+    'N': (0x3A, 0x3F, 0x52),   # dark trousers, lifted so they read on night sky
+    'O': (0xC8, 0x6A, 0x2C),   # warm deck lighting / bike frames
 }
 
 class G:
@@ -60,52 +83,66 @@ class G:
 # proportions stay identical across a cycle and the motion reads as weight.
 # Light outlines throughout: every screen sits on a dark background.
 
-def walker(phase, O='l', S='m', A='W'):
-    """Anatomy-driven walk cycle.
+# name, hair, skin, top, sleeve, legs, shoes
+CAST = [
+    ('blue', '5', '1', 'A', 'A', 'N', 'F'),
+    ('pink', '6', '2', 'P', 'P', 'N', 'P'),
+    ('green', '8', '3', 'E', 'F', 'J', 'F'),
+    ('purple', '5', '2', 'V', 'V', 'N', 'F'),
+    ('yellow', '7', '4', 'Y', 'Y', 'J', 'Y'),
+    ('teal', '8', '4', 'T', 'T', 'N', 'F'),
+]
 
-    Deriving frames from a skeleton keeps proportions identical across the
-    cycle and makes the motion read as weight rather than a slide. Solid
-    3px limbs and a 5px shoulder line stop the figure looking like an aerial.
+
+def walker(phase, hair, skin, top, sleeve, legs, shoes):
+    """A person, 11x15, from the reference sheet's cast.
+
+    Same skeleton as before -- joints swing, limbs drawn between them -- but
+    now coloured per character: hair, skin, top, trousers, shoes. At this size
+    colour is what distinguishes one person from another, which is why the
+    grey figures read as identical mannequins.
     """
     W, H = 11, 15
     g = G(W, H)
     cx = 5
     SH, HIP = 4, 9
-    t = phase * 2 * math.pi
 
-    # head, sitting on the shoulders with no spindly neck
-    g.rect(cx - 1, 0, cx + 1, 2, O, fill=True)
-    g.put(cx, 1, A)
-    # shoulders wider than the chest, chest wider than the waist
-    g.rect(cx - 2, SH - 1, cx + 2, SH, O, fill=True)
-    g.rect(cx - 1, SH + 1, cx + 1, SH + 3, O, fill=True)
-    g.rect(cx - 1, SH + 4, cx + 1, HIP - 1, S, fill=True)
+    # head: hair cap, face below it
+    g.rect(cx - 1, 0, cx + 1, 1, hair, fill=True)
+    g.rect(cx - 1, 2, cx + 1, 2, skin, fill=True)
+    g.put(cx - 1, 2, hair)                      # fringe on the leading side
+    g.put(cx + 1, 3, skin)                      # jaw
 
-    # legs: near leg light, far leg darker so they separate
-    for ph, col, thick in ((phase, O, True), (phase + 0.5, S, False)):
+    # shoulders wider than chest, chest wider than waist
+    g.rect(cx - 2, SH - 1, cx + 2, SH, top, fill=True)
+    g.rect(cx - 1, SH + 1, cx + 1, SH + 3, top, fill=True)
+    g.rect(cx - 1, SH + 4, cx + 1, HIP - 1, legs, fill=True)
+
+    # legs: near leg full colour, far leg darkened so they separate
+    for ph, col, near in ((phase, legs, True), (phase + 0.5, 'd', False)):
         a = math.sin(ph * 2 * math.pi)
         kx = cx + round(a * 2)
         ky = HIP + 3
         fx = cx + round(math.sin((ph + 0.12) * 2 * math.pi) * 3)
-        fy = H - 2
         g.line(cx, HIP, kx, ky, col)
-        g.line(kx, ky, fx, fy, col)
-        if thick:                      # give the near leg some mass
+        g.line(kx, ky, fx, H - 2, col)
+        if near:
             g.line(cx + 1, HIP, kx + 1, ky, col)
-            g.line(kx, ky + 1, fx, fy, col)
-        g.rect(fx - 1, H - 1, min(fx + 1, W - 1), H - 1, col, fill=True)
+        g.rect(max(0, fx - 1), H - 1, min(fx + 1, W - 1), H - 1,
+               shoes if near else 'd', fill=True)
 
-    # arms swing opposite the legs
-    for ph, col in ((phase + 0.5, O), (phase, S)):
+    # arms swing opposite the legs; sleeve in the top colour, hand in skin
+    for ph, col, near in ((phase + 0.5, sleeve, True), (phase, 'd', False)):
         a = math.sin(ph * 2 * math.pi)
         ex = cx + round(a * 2)
         hx = cx + round(math.sin((ph + 0.1) * 2 * math.pi) * 3)
         g.line(cx, SH, ex, SH + 3, col)
         g.line(ex, SH + 3, hx, SH + 5, col)
+        if near:
+            g.put(hx, SH + 5, skin)
     return g
 
-
-def cyclist(phase, O='l', S='m', A='l'):
+def cyclist(phase, hair, skin, top, frame='O', O='l', S='m'):
     """Bicycle with a rider, pedalling. 1.75 m long, 1.9 m tall.
 
     Built from a riding posture -- hip on the saddle, shoulders forward over
@@ -124,26 +161,26 @@ def cyclist(phase, O='l', S='m', A='l'):
     # frame first, so the rider sits in front of it
     for wx in (rear, front):
         g.ring(wx, ry, RW, S)
-    g.line(rear, ry, bb, ry, O)                       # chainstay
-    g.line(bb, ry, saddle[0], saddle[1], O)           # seat tube
-    g.line(rear, ry, saddle[0], saddle[1], O)         # seat stay
-    g.line(saddle[0], saddle[1], bars[0], bars[1], O) # top tube
-    g.line(bb, ry, bars[0], bars[1], O)               # down tube
-    g.line(bars[0], bars[1], front, ry, O)            # fork
+    g.line(rear, ry, bb, ry, frame)                       # chainstay
+    g.line(bb, ry, saddle[0], saddle[1], frame)           # seat tube
+    g.line(rear, ry, saddle[0], saddle[1], frame)         # seat stay
+    g.line(saddle[0], saddle[1], bars[0], bars[1], frame) # top tube
+    g.line(bb, ry, bars[0], bars[1], frame)               # down tube
+    g.line(bars[0], bars[1], front, ry, frame)            # fork
     g.rect(bars[0] - 1, bars[1] - 1, bars[0] + 1, bars[1] - 1, O, fill=True)
     g.rect(saddle[0] - 1, saddle[1] - 1, saddle[0] + 1, saddle[1] - 1, O, fill=True)
 
     # rider: hip -> shoulder leans forward; head sits on the shoulders
     hip = (saddle[0], saddle[1] - 1)
     sh = (hip[0] + 3, 3)
-    g.line(hip[0], hip[1], sh[0], sh[1], A)           # torso
-    g.line(hip[0] + 1, hip[1], sh[0] + 1, sh[1], A)   # torso, 2px for mass
-    g.rect(sh[0], sh[1] - 2, sh[0] + 1, sh[1] - 1, A, fill=True)   # head
-    g.put(sh[0] + 1, sh[1] - 2, 'W')                  # face
-    g.line(sh[0] + 1, sh[1] + 1, bars[0] - 1, bars[1] - 1, S)   # arm to bars
+    g.line(hip[0], hip[1], sh[0], sh[1], top)         # torso
+    g.line(hip[0] + 1, hip[1], sh[0] + 1, sh[1], top)
+    g.rect(sh[0], sh[1] - 2, sh[0] + 1, sh[1] - 1, hair, fill=True)   # helmet/hair
+    g.put(sh[0] + 1, sh[1] - 1, skin)                 # face
+    g.line(sh[0] + 1, sh[1] + 1, bars[0] - 1, bars[1] - 1, top)  # arm to bars
 
     # legs down to the rotating cranks
-    for ph, col in ((phase, A), (phase + 0.5, S)):
+    for ph, col in ((phase, 'N'), (phase + 0.5, 'd')):
         t = ph * 2 * math.pi
         px_ = bb + round(math.cos(t) * 2)
         py_ = ry + round(math.sin(t) * 2)
@@ -158,7 +195,7 @@ def phase_pedal(ph):
     return (round(math.cos(t) * 2), round(math.sin(t) * 2))
 
 
-def motorbike(phase, O='l', S='m', A='l', B='r'):
+def motorbike(phase, hair, skin, top, O='l', S='m', B='r'):
     """Motorbike with a rider, crouched forward. 2.1 m long, 1.8 m tall."""
     W, H = 18, 15
     g = G(W, H)
@@ -176,16 +213,16 @@ def motorbike(phase, O='l', S='m', A='l', B='r'):
 
     hip = (rear + 2, ry - 6)
     sh = (hip[0] + 3, 3)
-    g.line(hip[0], hip[1], sh[0], sh[1], A)
-    g.line(hip[0] + 1, hip[1], sh[0] + 1, sh[1], A)
-    g.rect(sh[0], sh[1] - 2, sh[0] + 1, sh[1] - 1, A, fill=True)
-    g.put(sh[0] + 1, sh[1] - 2, 'W')
+    g.line(hip[0], hip[1], sh[0], sh[1], top)
+    g.line(hip[0] + 1, hip[1], sh[0] + 1, sh[1], top)
+    g.rect(sh[0], sh[1] - 2, sh[0] + 1, sh[1] - 1, hair, fill=True)   # helmet
+    g.put(sh[0] + 1, sh[1] - 1, skin)
     g.line(sh[0] + 1, sh[1] + 1, front - 1, ry - 6, S)           # arm to bars
     g.line(hip[0], hip[1] + 1, hip[0] + 2, ry - 1, S)            # leg to peg
     return g
 
 
-def car(phase, O='l', S='m', G_='c', B='R'):
+def car(phase, O='l', S='m', G_='c', B='r'):
     """Saloon car. 4.2 m long, 1.5 m tall -- the one that was most wrong."""
     W, H = 36, 13
     g = G(W, H)
@@ -254,16 +291,24 @@ def water():
         g.line(x0+1,3,x0+3,3,'B'); g.put(x0+6,4,'B')
     return g
 
-SPRITES = [
-    # Four-frame walk cycle.
-    ('walk0', walker(0.00)), ('walk1', walker(0.25)),
-    ('walk2', walker(0.50)), ('walk3', walker(0.75)),
-    # Two-frame pedal / wheel cycles.
-    ('cyclist0', cyclist(0.0)), ('cyclist1', cyclist(0.5)),
-    ('moto0', motorbike(0.0)), ('moto1', motorbike(0.5)),
-    ('car0', car(0.0)), ('car1', car(0.5)),
-    ('ship', ship()), ('cone', cone()), ('water', water()),
-]
+SPRITES = (
+    # The cast: six people, four walk frames each.
+    [
+        (f'walk{name.capitalize()}{i}', walker(i / 4, *spec))
+        for name, *spec in CAST
+        for i in range(4)
+    ]
+    + [
+        # Riders borrow characters from the same cast.
+        ('cyclist0', cyclist(0.0, '6', '2', 'P')),
+        ('cyclist1', cyclist(0.5, '6', '2', 'P')),
+        ('moto0', motorbike(0.0, '8', '1', 'A')),
+        ('moto1', motorbike(0.5, '8', '1', 'A')),
+        ('car0', car(0.0)), ('car1', car(0.5)),
+        ('ship', ship()), ('cone', cone()), ('water', water()),
+    ]
+)
+
 
 def preview(path,scale=7):
     tiles=[]
@@ -286,13 +331,23 @@ def emit_dart():
      "// GENERATED by tools/gen_sprites.py — do not edit by hand.",
      "// Re-run: python3 tools/gen_sprites.py",
      "//",
-     "// Sprites are character matrices; PixelPalette.charToColor maps each",
-     "// character to a C64 colour. '.' is transparent.",
+     "// Sprites are character matrices indexed into `palette` below.",
+     "// '.' is transparent.",
      "",
-     "/// Pixel-art sprite matrices, drawn with light outlines because every",
-     "/// screen in the app sits on a dark background.",
+     "import 'dart:ui' show Color;",
+     "",
+     "/// Pixel-art sprite matrices and the palette they index into.",
      "class PixelSprites {",
      "  const PixelSprites._();",
+     "",
+     "  /// Character -> colour. Generated with the sprites so the two cannot",
+     "  /// drift: a sprite using an unmapped character would render nothing.",
+     "  static const Map<String, Color> palette = <String, Color>{",
+    ] + [
+     f"    '{ch}': Color(0xFF{r:02X}{g:02X}{b:02X}),"
+     for ch, (r, g, b) in PAL.items()
+    ] + [
+     "  };",
     ]
     for name,g in SPRITES:
         rows=g.rows()

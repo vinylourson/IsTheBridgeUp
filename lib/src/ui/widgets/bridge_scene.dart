@@ -285,6 +285,28 @@ class _BridgeScenePainter extends CustomPainter {
       }
     }
 
+    // Sodium deck lighting, implied rather than built: a lamp standard is
+    // about 8 m, which is 68 px at this scale and taller than the whole
+    // scene. Drawing the posts made a picket fence, so instead there are
+    // pools of warm light on the deck and a dim smear on the water.
+    for (int x = 8; x < _Layout.width; x += 19) {
+      // On the road surface, not hovering above it: drawn above the deck line
+      // the pools read as small yellow objects rather than light.
+      box(x - 2, _Layout.deckY + 1, x + 2, _Layout.deckY + 1,
+          PixelPalette.lampLit);
+      box(x - 1, _Layout.deckY + 2, x + 1, _Layout.deckY + 2,
+          PixelPalette.lampGlow);
+      box(x, _Layout.waterY + 2, x, _Layout.waterY + 2, PixelPalette.lampGlow);
+    }
+
+    // Red aviation lights near the tops of both pylons, as on the real bridge.
+    for (final int x in <int>[
+      _Layout.leftTowerX0 + 3,
+      _Layout.rightTowerX0 + 3,
+    ]) {
+      box(x, _Layout.towerTop + 1, x, _Layout.towerTop + 1, PixelPalette.beacon);
+    }
+
     if (lift < 0.05) {
       _paintTraffic(canvas, px);
     } else if (maintenance) {
@@ -292,32 +314,57 @@ class _BridgeScenePainter extends CustomPainter {
     }
   }
 
-  /// Everything crossing while the bridge is open, each at its own pace:
-  /// people on foot, a cyclist, a moto and a car.
+  /// Everything crossing while the bridge is open.
   ///
-  /// Animation frames are chosen from distance travelled, not from a timer, so
-  /// a walk cycle stays in step with the walking speed and a crank with the
-  /// pedalling speed. Resting positions keep everything clear of the towers
-  /// when motion is reduced.
+  /// Six people from the cast, a cyclist, a moto and a car, each at its own
+  /// speed and phase so the deck has a trickle of traffic rather than a
+  /// parade. Animation frames come from distance travelled, not a timer, so a
+  /// stride stays in step with the walking speed and a crank with the
+  /// pedalling speed.
   void _paintTraffic(Canvas canvas, double px) {
     const double span = _Layout.width + 60;
-    const List<List<String>> walking = <List<String>>[
-      PixelSprites.walk0,
-      PixelSprites.walk1,
-      PixelSprites.walk2,
-      PixelSprites.walk3,
+
+    const List<List<String>> blue = <List<String>>[
+      PixelSprites.walkBlue0, PixelSprites.walkBlue1,
+      PixelSprites.walkBlue2, PixelSprites.walkBlue3,
+    ];
+    const List<List<String>> pink = <List<String>>[
+      PixelSprites.walkPink0, PixelSprites.walkPink1,
+      PixelSprites.walkPink2, PixelSprites.walkPink3,
+    ];
+    const List<List<String>> green = <List<String>>[
+      PixelSprites.walkGreen0, PixelSprites.walkGreen1,
+      PixelSprites.walkGreen2, PixelSprites.walkGreen3,
+    ];
+    const List<List<String>> purple = <List<String>>[
+      PixelSprites.walkPurple0, PixelSprites.walkPurple1,
+      PixelSprites.walkPurple2, PixelSprites.walkPurple3,
+    ];
+    const List<List<String>> yellow = <List<String>>[
+      PixelSprites.walkYellow0, PixelSprites.walkYellow1,
+      PixelSprites.walkYellow2, PixelSprites.walkYellow3,
+    ];
+    const List<List<String>> teal = <List<String>>[
+      PixelSprites.walkTeal0, PixelSprites.walkTeal1,
+      PixelSprites.walkTeal2, PixelSprites.walkTeal3,
     ];
 
+    // Resting positions are the reduced-motion freeze-frame: spread along both
+    // footways and the span, a couple part-way off the edges so it reads as
+    // people crossing rather than a line-up.
     const List<_Traveller> traffic = <_Traveller>[
-      // People walk at roughly a quarter of the car's pace.
-      _Traveller(walking, 0.30, 0.15, false, 8, 3),
-      _Traveller(walking, 0.26, 0.60, true, 22, 3),
+      _Traveller(green, 0.24, 0.05, false, -8, 3),
+      _Traveller(blue, 0.30, 0.20, false, 5, 3),
+      _Traveller(pink, 0.27, 0.42, true, 19, 3),
+      _Traveller(yellow, 0.32, 0.63, false, 30, 3),
+      _Traveller(teal, 0.26, 0.78, true, 132, 3),
+      _Traveller(purple, 0.29, 0.90, true, 145, 3),
       _Traveller(<List<String>>[PixelSprites.car0, PixelSprites.car1],
           1.00, 0.00, false, 44, 2),
       _Traveller(<List<String>>[PixelSprites.moto0, PixelSprites.moto1],
-          1.35, 0.45, false, 84, 2),
+          1.35, 0.45, false, 82, 2),
       _Traveller(<List<String>>[PixelSprites.cyclist0, PixelSprites.cyclist1],
-          0.70, 0.70, true, 118, 2),
+          0.70, 0.70, true, 112, 2),
     ];
 
     for (final _Traveller traveller in traffic) {
