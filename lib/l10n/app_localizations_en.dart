@@ -142,10 +142,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alertsTitle => 'Alerts';
 
   @override
-  String get alertsUnavailableOnWeb =>
-      'Alerts need the phone app. The web version cannot schedule reminders.';
-
-  @override
   String get alertsLeadTime => 'Warn me before a closure';
 
   @override
@@ -171,4 +167,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get infoOpenSourcePage => 'Open the dataset page';
+
+  @override
+  String get alertsExplain =>
+      'A reminder before each closure, so you can take another route instead of finding out at the barrier.';
+
+  @override
+  String get alertsEnable => 'Turn alerts on';
+
+  @override
+  String get alertsDisable => 'Turn alerts off';
+
+  @override
+  String get alertsOn => 'ALERTS ON';
+
+  @override
+  String get alertsOff => 'ALERTS OFF';
+
+  @override
+  String get alertsAsking => 'Asking…';
+
+  @override
+  String get alertsBlocked =>
+      'Notifications are blocked for this app. Turn them on in your device settings, then come back and tap Check again.';
+
+  @override
+  String get alertsRecheck => 'Check again';
+
+  @override
+  String alertsScheduled(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reminders scheduled',
+      one: '1 reminder scheduled',
+      zero: 'No reminders scheduled',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get alertsNextReminders => 'Next reminders';
+
+  @override
+  String get alertsTimingNote =>
+      'Delivery can be a few minutes late: the app asks for a battery-friendly alarm rather than an exact one.';
+
+  @override
+  String get alertsWebNote =>
+      'A browser cannot post a reminder once its tab is closed, so alerts need the Android or iOS app.';
+
+  @override
+  String notificationTitle(String time) {
+    return 'Bridge closes at $time';
+  }
+
+  @override
+  String notificationBody(String vessel, String end) {
+    return '$vessel · closed until $end. Take another route.';
+  }
+
+  @override
+  String notificationBodyMaintenance(String end) {
+    return 'Maintenance · closed until $end. Take another route.';
+  }
 }

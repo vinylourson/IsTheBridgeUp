@@ -6,10 +6,12 @@ import 'package:timezone/timezone.dart' as tz;
 import 'src/app.dart';
 import 'src/core/config.dart';
 import 'src/data/repositories/closure_repository.dart';
+import 'src/data/services/alert_preferences_service.dart';
 import 'src/data/services/chaban_api_service.dart';
 import 'src/data/services/closure_cache_service.dart';
 import 'src/data/services/notification_service.dart';
 import 'src/domain/bridge_clock.dart';
+import 'src/ui/alerts/alerts_view_model.dart';
 import 'src/ui/status/status_view_model.dart';
 
 void main() {
@@ -26,11 +28,11 @@ void main() {
     clock: clock,
   );
 
-  // No platform can deliver reminders yet: web genuinely cannot, and the
-  // mobile targets are not wired up in this pass. ReminderPlanner already
-  // decides *what* to schedule, so only this line changes when the
-  // flutter_local_notifications-backed implementation lands.
-  const NotificationService notifications = UnsupportedNotificationService();
+  // Real notifications on Android and iOS. The service reports canSchedule
+  // false on web, where the plugin builds but zonedSchedule throws: a browser
+  // cannot run code to post a reminder once its tab is closed.
+  final NotificationService notifications = LocalNotificationService();
+  final AlertPreferencesService alertPreferences = AlertPreferencesService();
 
   runApp(
     MultiProvider(
@@ -41,6 +43,14 @@ void main() {
         ChangeNotifierProvider<StatusViewModel>(
           create: (_) =>
               StatusViewModel(repository: repository, clock: clock),
+        ),
+        ChangeNotifierProvider<AlertsViewModel>(
+          create: (_) => AlertsViewModel(
+            notifications: notifications,
+            preferences: alertPreferences,
+            repository: repository,
+            clock: clock,
+          ),
         ),
       ],
       child: const IsTheBridgeUpApp(),

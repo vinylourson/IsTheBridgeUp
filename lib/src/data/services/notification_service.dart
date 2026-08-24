@@ -1,47 +1,232 @@
-import '../../domain/models/closure.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+
 import '../../domain/reminder_planner.dart';
 
-/// Schedules device-local reminders ahead of a closure.
+/// Whether the OS will let us post notifications.
+enum NotificationPermission {
+  /// Not asked yet, or the platform will not say.
+  unknown,
+  granted,
+
+  /// Refused, or switched off later in system settings. Only the user can
+  /// undo this — asking again does nothing.
+  denied,
+}
+
+/// Builds the text for one reminder.
 ///
-/// The interface exists ahead of any implementation on purpose. Reminder
-/// *planning* is finished and tested ([ReminderPlanner]); only delivery is
-/// platform-specific. `flutter_local_notifications` has no web support and
-/// imports dart:io, so the web build gets [UnsupportedNotificationService]
-/// and the Alerts screen says so plainly rather than pretending.
+/// A callback rather than baked-in strings, so the localised copy stays in the
+/// UI layer and this service carries no l10n dependency.
+typedef ReminderText = ({String title, String body}) Function(Reminder reminder);
+
 abstract interface class NotificationService {
-  /// False when this platform cannot deliver local notifications at all.
-  bool get isSupported;
+  /// False where the platform cannot post a notification at a *future* time.
+  bool get canSchedule;
 
-  /// Asks the OS for permission. Returns whether it was granted.
-  Future<bool> requestPermission();
+  Future<void> initialize();
 
-  /// Replaces all pending reminders with ones for [closures].
+  /// Current permission state, without prompting.
+  Future<NotificationPermission> permission();
+
+  /// Prompts the user. This is what shows the OS dialog.
+  Future<NotificationPermission> requestPermission();
+
+  /// Replaces all pending reminders with these.
   Future<void> schedule({
-    required List<Closure> closures,
-    required DateTime now,
-    required Duration leadTime,
+    required List<Reminder> reminders,
+    required ReminderText text,
   });
 
   Future<void> cancelAll();
+
+  /// How many reminders the OS is actually holding.
+  Future<int> pendingCount();
 }
 
-/// Used wherever the platform cannot schedule notifications — currently web.
+/// Real implementation, backed by flutter_local_notifications.
+class LocalNotificationService implements NotificationService {
+  LocalNotificationService({FlutterLocalNotificationsPlugin? plugin})
+    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+
+  final FlutterLocalNotificationsPlugin _plugin;
+  bool _initialised = false;
+
+  static const String _channelId = 'chaban.closures';
+  static const String _channelName = 'Bridge closures';
+  static const String _channelDescription =
+      'Warnings before the Chaban-Delmas bridge closes to traffic.';
+
+  /// The plugin builds for web, but `zonedSchedule` throws there: a browser
+  /// cannot run code to post a notification once the tab is closed.
+  @override
+  bool get canSchedule => !kIsWeb;
+
+  @override
+  Future<void> initialize() async {
+    if (_initialised) return;
+    await _plugin.initialize(
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        // Permission is requested from the Alerts screen instead of here, so
+        // the prompt appears when the user asks for alerts. Asking on first
+        // launch, before the app has explained itself, gets it denied.
+        iOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
+      ),
+    );
+    _initialised = true;
+  }
+
+  @override
+  Future<NotificationPermission> permission() async {
+    if (!canSchedule) return NotificationPermission.unknown;
+    await initialize();
+
+    final AndroidFlutterLocalNotificationsPlugin? android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android != null) {
+      return _fromBool(await android.areNotificationsEnabled());
+    }
+
+    final IOSFlutterLocalNotificationsPlugin? ios = _plugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
+    if (ios != null) {
+      final NotificationsEnabledOptions? options = await ios.checkPermissions();
+      return _fromBool(options?.isEnabled);
+    }
+    return NotificationPermission.unknown;
+  }
+
+  @override
+  Future<NotificationPermission> requestPermission() async {
+    if (!canSchedule) return NotificationPermission.unknown;
+    await initialize();
+
+    final AndroidFlutterLocalNotificationsPlugin? android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android != null) {
+      // Deliberately not requesting SCHEDULE_EXACT_ALARM: on Android 14+ that
+      // throws the user out to a system settings page, and a warning an hour
+      // ahead does not need to-the-second delivery. See the schedule mode
+      // chosen below.
+      return _fromBool(await android.requestNotificationsPermission());
+    }
+
+    final IOSFlutterLocalNotificationsPlugin? ios = _plugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
+    if (ios != null) {
+      return _fromBool(
+        await ios.requestPermissions(alert: true, badge: true, sound: true),
+      );
+    }
+    return NotificationPermission.unknown;
+  }
+
+  @override
+  Future<void> schedule({
+    required List<Reminder> reminders,
+    required ReminderText text,
+  }) async {
+    if (!canSchedule) return;
+    await initialize();
+    // Replace wholesale: the schedule shifts when the feed updates, and
+    // reconciling individual ids would be more code and more ways to be wrong.
+    await cancelAll();
+
+    const NotificationDetails details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        channelDescription: _channelDescription,
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    );
+
+    for (int i = 0; i < reminders.length; i++) {
+      final Reminder reminder = reminders[i];
+      final ({String title, String body}) copy = text(reminder);
+      await _plugin.zonedSchedule(
+        id: i,
+        scheduledDate: tz.TZDateTime.from(
+          reminder.at,
+          reminder.closure.start.location,
+        ),
+        notificationDetails: details,
+        // Inexact on purpose. An exact alarm needs SCHEDULE_EXACT_ALARM, which
+        // Android 14+ gates behind a settings trip and Play Store review, to
+        // buy precision this app does not need: a few minutes' slack on a
+        // one-hour warning changes nothing.
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        title: copy.title,
+        body: copy.body,
+      );
+    }
+  }
+
+  @override
+  Future<void> cancelAll() async {
+    if (!canSchedule) return;
+    await initialize();
+    await _plugin.cancelAll();
+  }
+
+  @override
+  Future<int> pendingCount() async {
+    if (!canSchedule) return 0;
+    await initialize();
+    return (await _plugin.pendingNotificationRequests()).length;
+  }
+
+  static NotificationPermission _fromBool(bool? granted) => switch (granted) {
+    true => NotificationPermission.granted,
+    false => NotificationPermission.denied,
+    null => NotificationPermission.unknown,
+  };
+}
+
+/// Used where notifications cannot work at all. Kept for tests and for any
+/// future platform without support.
 class UnsupportedNotificationService implements NotificationService {
   const UnsupportedNotificationService();
 
   @override
-  bool get isSupported => false;
+  bool get canSchedule => false;
 
   @override
-  Future<bool> requestPermission() async => false;
+  Future<void> initialize() async {}
+
+  @override
+  Future<NotificationPermission> permission() async =>
+      NotificationPermission.unknown;
+
+  @override
+  Future<NotificationPermission> requestPermission() async =>
+      NotificationPermission.unknown;
 
   @override
   Future<void> schedule({
-    required List<Closure> closures,
-    required DateTime now,
-    required Duration leadTime,
+    required List<Reminder> reminders,
+    required ReminderText text,
   }) async {}
 
   @override
   Future<void> cancelAll() async {}
+
+  @override
+  Future<int> pendingCount() async => 0;
 }

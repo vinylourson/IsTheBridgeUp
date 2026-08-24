@@ -1,34 +1,27 @@
 {
   "@@locale": "fr",
-
   "appTitle": "Le pont est-il levé ?",
   "bridgeName": "Pont Chaban-Delmas",
   "bridgeCity": "Bordeaux",
-
   "statusOpen": "PONT OUVERT",
   "statusClosed": "PONT FERMÉ",
   "statusUnknown": "PAS DE DONNÉES",
-
   "youMayCross": "Vous pouvez passer",
   "takeAnotherRoute": "Prenez un autre itinéraire",
   "noDataYet": "Impossible de charger les horaires",
-
   "nextClosureIn": "Prochaine fermeture dans {duration}",
   "reopensIn": "Réouverture dans {duration}",
   "reopensAt": "Réouverture à {time}",
   "noUpcomingClosures": "Aucune fermeture prévue",
   "closureWindow": "{start} > {end}",
-
   "durationDay": "{value}j",
   "durationHour": "{value}h",
   "durationMinute": "{value}min",
   "durationLessThanAMinute": "moins d'une minute",
-
-  "tabStatus": "ÉTAT",
+  "tabStatus": "ETAT",
   "tabSchedule": "LISTE",
   "tabAlerts": "ALERTES",
   "tabInfo": "INFOS",
-
   "scheduleTitle": "Prochaines levées",
   "scheduleEmpty": "Rien de prévu. Le jeu de données ne contient plus de fermeture.",
   "maintenanceLabel": "Maintenance",
@@ -36,25 +29,35 @@
   "tomorrowLabel": "Demain",
   "overnightNote": "de nuit",
   "durationLabel": "{duration} de fermeture",
-
   "inProgress": "EN COURS",
-
   "refresh": "Actualiser",
   "retry": "Réessayer",
   "loading": "Chargement…",
   "updatedAt": "Mis à jour {time}",
   "offlineStale": "Hors ligne — données du {time}",
   "refreshFailed": "Actualisation impossible. Données enregistrées affichées.",
-
   "alertsTitle": "Alertes",
-  "alertsUnavailableOnWeb": "Les alertes nécessitent l'application mobile. La version web ne peut pas programmer de rappels.",
   "alertsLeadTime": "M'avertir avant une fermeture",
-
   "infoTitle": "Infos",
   "infoWhat": "Le pont Chaban-Delmas se lève pour laisser passer les grands navires sur la Garonne. La circulation est alors coupée pendant environ une heure, et le détour est long. Cette application vous dit si vous pouvez passer.",
   "infoForecastCaveat": "Ce sont des prévisions publiées par Bordeaux Métropole, pas un capteur en temps réel. Les horaires peuvent changer et une levée peut être annulée. Vérifiez avant de vous y fier.",
   "infoTimesInParis": "Toutes les heures sont à l'heure locale de Bordeaux (Europe/Paris).",
   "infoDataSource": "Source des données",
   "infoLicence": "Licence",
-  "infoOpenSourcePage": "Ouvrir la page du jeu de données"
+  "infoOpenSourcePage": "Ouvrir la page du jeu de données",
+  "alertsExplain": "Un rappel avant chaque fermeture, pour prendre un autre itinéraire au lieu de le découvrir devant la barrière.",
+  "alertsEnable": "Activer les alertes",
+  "alertsDisable": "Désactiver les alertes",
+  "alertsOn": "ALERTES ACTIVÉES",
+  "alertsOff": "ALERTES DÉSACTIVÉES",
+  "alertsAsking": "Demande…",
+  "alertsBlocked": "Les notifications sont bloquées pour cette application. Activez-les dans les réglages de l'appareil, puis revenez et touchez Vérifier.",
+  "alertsRecheck": "Vérifier",
+  "alertsScheduled": "{count, plural, =0{Aucun rappel programmé} =1{1 rappel programmé} other{{count} rappels programmés}}",
+  "alertsNextReminders": "Prochains rappels",
+  "alertsTimingNote": "La livraison peut avoir quelques minutes de retard : l'application demande une alarme économe en batterie plutôt qu'exacte.",
+  "alertsWebNote": "Un navigateur ne peut pas envoyer de rappel une fois son onglet fermé. Les alertes nécessitent l'application Android ou iOS.",
+  "notificationTitle": "Fermeture du pont à {time}",
+  "notificationBody": "{vessel} · fermé jusqu'à {end}. Prenez un autre itinéraire.",
+  "notificationBodyMaintenance": "Maintenance · fermé jusqu'à {end}. Prenez un autre itinéraire."
 }

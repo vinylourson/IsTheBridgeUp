@@ -37,6 +37,16 @@ class PixelText {
     height: 1.6,
   );
 
+  /// The app's own name in the header. Press Start 2P at 8px rendered
+  /// *smaller* than the Silkscreen subtitle under it, which made the title
+  /// look like a footnote. 13px is the largest that still leaves room for the
+  /// clock beside the longer French name on a 320pt screen.
+  static const TextStyle appName = TextStyle(
+    fontFamily: PixelFonts.display,
+    fontSize: 13,
+    height: 1.5,
+  );
+
   static const TextStyle label = TextStyle(
     fontFamily: PixelFonts.display,
     fontSize: 8,

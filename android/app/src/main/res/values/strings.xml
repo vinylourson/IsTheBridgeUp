@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shown under the launcher icon, so it has to stay short: Android
+         truncates long labels. The full name lives in the store listing. -->
+    <string name="app_name">Bridge Up?</string>
+</resources>

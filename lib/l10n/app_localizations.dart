@@ -320,12 +320,6 @@ abstract class AppLocalizations {
   /// **'Alerts'**
   String get alertsTitle;
 
-  /// No description provided for @alertsUnavailableOnWeb.
-  ///
-  /// In en, this message translates to:
-  /// **'Alerts need the phone app. The web version cannot schedule reminders.'**
-  String get alertsUnavailableOnWeb;
-
   /// No description provided for @alertsLeadTime.
   ///
   /// In en, this message translates to:
@@ -373,6 +367,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open the dataset page'**
   String get infoOpenSourcePage;
+
+  /// No description provided for @alertsExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'A reminder before each closure, so you can take another route instead of finding out at the barrier.'**
+  String get alertsExplain;
+
+  /// No description provided for @alertsEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn alerts on'**
+  String get alertsEnable;
+
+  /// No description provided for @alertsDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn alerts off'**
+  String get alertsDisable;
+
+  /// No description provided for @alertsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'ALERTS ON'**
+  String get alertsOn;
+
+  /// No description provided for @alertsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'ALERTS OFF'**
+  String get alertsOff;
+
+  /// No description provided for @alertsAsking.
+  ///
+  /// In en, this message translates to:
+  /// **'Asking…'**
+  String get alertsAsking;
+
+  /// No description provided for @alertsBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are blocked for this app. Turn them on in your device settings, then come back and tap Check again.'**
+  String get alertsBlocked;
+
+  /// No description provided for @alertsRecheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get alertsRecheck;
+
+  /// No description provided for @alertsScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No reminders scheduled} =1{1 reminder scheduled} other{{count} reminders scheduled}}'**
+  String alertsScheduled(int count);
+
+  /// No description provided for @alertsNextReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Next reminders'**
+  String get alertsNextReminders;
+
+  /// No description provided for @alertsTimingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery can be a few minutes late: the app asks for a battery-friendly alarm rather than an exact one.'**
+  String get alertsTimingNote;
+
+  /// No description provided for @alertsWebNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A browser cannot post a reminder once its tab is closed, so alerts need the Android or iOS app.'**
+  String get alertsWebNote;
+
+  /// No description provided for @notificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bridge closes at {time}'**
+  String notificationTitle(String time);
+
+  /// No description provided for @notificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{vessel} · closed until {end}. Take another route.'**
+  String notificationBody(String vessel, String end);
+
+  /// No description provided for @notificationBodyMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance · closed until {end}. Take another route.'**
+  String notificationBodyMaintenance(String end);
 }
 
 class _AppLocalizationsDelegate

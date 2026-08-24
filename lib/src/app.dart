@@ -134,9 +134,10 @@ class _Header extends StatelessWidget {
               children: <Widget>[
                 Text(
                   l10n.appTitle,
-                  style: PixelText.label.copyWith(color: PixelPalette.open),
+                  style: PixelText.appName.copyWith(color: PixelPalette.open),
+                  maxLines: 2,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 5),
                 Text(
                   '${l10n.bridgeName} · ${l10n.bridgeCity}',
                   style: PixelText.bodySmall.copyWith(

@@ -40,4 +40,7 @@ class CacheKeys {
   const CacheKeys._();
   static const String records = 'chaban.records.v1';
   static const String fetchedAt = 'chaban.fetchedAt.v1';
+
+  static const String alertsEnabled = 'chaban.alerts.enabled.v1';
+  static const String alertsLeadMinutes = 'chaban.alerts.leadMinutes.v1';
 }

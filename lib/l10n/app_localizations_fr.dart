@@ -78,7 +78,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get durationLessThanAMinute => 'moins d\'une minute';
 
   @override
-  String get tabStatus => 'ÉTAT';
+  String get tabStatus => 'ETAT';
 
   @override
   String get tabSchedule => 'LISTE';
@@ -143,10 +143,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get alertsTitle => 'Alertes';
 
   @override
-  String get alertsUnavailableOnWeb =>
-      'Les alertes nécessitent l\'application mobile. La version web ne peut pas programmer de rappels.';
-
-  @override
   String get alertsLeadTime => 'M\'avertir avant une fermeture';
 
   @override
@@ -172,4 +168,68 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get infoOpenSourcePage => 'Ouvrir la page du jeu de données';
+
+  @override
+  String get alertsExplain =>
+      'Un rappel avant chaque fermeture, pour prendre un autre itinéraire au lieu de le découvrir devant la barrière.';
+
+  @override
+  String get alertsEnable => 'Activer les alertes';
+
+  @override
+  String get alertsDisable => 'Désactiver les alertes';
+
+  @override
+  String get alertsOn => 'ALERTES ACTIVÉES';
+
+  @override
+  String get alertsOff => 'ALERTES DÉSACTIVÉES';
+
+  @override
+  String get alertsAsking => 'Demande…';
+
+  @override
+  String get alertsBlocked =>
+      'Les notifications sont bloquées pour cette application. Activez-les dans les réglages de l\'appareil, puis revenez et touchez Vérifier.';
+
+  @override
+  String get alertsRecheck => 'Vérifier';
+
+  @override
+  String alertsScheduled(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rappels programmés',
+      one: '1 rappel programmé',
+      zero: 'Aucun rappel programmé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get alertsNextReminders => 'Prochains rappels';
+
+  @override
+  String get alertsTimingNote =>
+      'La livraison peut avoir quelques minutes de retard : l\'application demande une alarme économe en batterie plutôt qu\'exacte.';
+
+  @override
+  String get alertsWebNote =>
+      'Un navigateur ne peut pas envoyer de rappel une fois son onglet fermé. Les alertes nécessitent l\'application Android ou iOS.';
+
+  @override
+  String notificationTitle(String time) {
+    return 'Fermeture du pont à $time';
+  }
+
+  @override
+  String notificationBody(String vessel, String end) {
+    return '$vessel · fermé jusqu\'à $end. Prenez un autre itinéraire.';
+  }
+
+  @override
+  String notificationBodyMaintenance(String end) {
+    return 'Maintenance · fermé jusqu\'à $end. Prenez un autre itinéraire.';
+  }
 }
