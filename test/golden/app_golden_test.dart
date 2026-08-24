@@ -11,14 +11,17 @@ import 'package:is_the_bridge_up/src/app.dart';
 import 'package:is_the_bridge_up/src/data/repositories/closure_repository.dart';
 import 'package:is_the_bridge_up/src/data/services/chaban_api_service.dart';
 import 'package:is_the_bridge_up/src/data/services/closure_cache_service.dart';
+import 'package:is_the_bridge_up/src/data/services/alert_preferences_service.dart';
 import 'package:is_the_bridge_up/src/data/services/notification_service.dart';
 import 'package:is_the_bridge_up/src/domain/bridge_clock.dart';
+import 'package:is_the_bridge_up/src/ui/alerts/alerts_view_model.dart';
 import 'package:is_the_bridge_up/src/ui/status/status_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../support/fake_notifications.dart';
 import 'test_fonts.dart';
 
 /// Records around 2026-08-23, matching the live fixture: two closures that
@@ -82,6 +85,7 @@ void main() {
     required DateTime now,
     Locale locale = const Locale('en'),
     Size size = const Size(420, 900),
+    NotificationService notifications = const UnsupportedNotificationService(),
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
@@ -116,6 +120,16 @@ void main() {
             ChangeNotifierProvider<StatusViewModel>(
               create: (_) =>
                   StatusViewModel(repository: repository, clock: clock),
+            ),
+            // Unsupported on purpose: a widget test has no platform channels,
+            // and this also exercises the "cannot schedule here" path.
+            ChangeNotifierProvider<AlertsViewModel>(
+              create: (_) => AlertsViewModel(
+                notifications: notifications,
+                preferences: AlertPreferencesService(),
+                repository: repository,
+                clock: clock,
+              ),
             ),
           ],
           child: IsTheBridgeUpApp(locale: locale),
@@ -187,6 +201,44 @@ void main() {
     await expectLater(
       find.byType(IsTheBridgeUpApp),
       matchesGoldenFile('goldens/status_closed_fr_320.png'),
+    );
+  });
+
+  testWidgets('alerts – on, with reminders scheduled', (
+    WidgetTester tester,
+  ) async {
+    await pumpApp(
+      tester,
+      now: DateTime.utc(2026, 8, 23, 4),
+      notifications: FakeNotifications(
+        initialPermission: NotificationPermission.granted,
+      ),
+    );
+    await tapTab(tester, 'ALERTS');
+    await tester.tap(find.text('Turn alerts on'));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('ALERTS ON'), findsOne);
+    await expectLater(
+      find.byType(IsTheBridgeUpApp),
+      matchesGoldenFile('goldens/alerts_on_en.png'),
+    );
+  });
+
+  testWidgets('alerts – blocked by the system, French', (
+    WidgetTester tester,
+  ) async {
+    await pumpApp(
+      tester,
+      now: DateTime.utc(2026, 8, 23, 4),
+      locale: const Locale('fr'),
+      notifications: FakeNotifications(grantOnRequest: false),
+    );
+    await tapTab(tester, 'ALERTES');
+    await tester.tap(find.text('Activer les alertes'));
+    await tester.pump(const Duration(seconds: 1));
+    await expectLater(
+      find.byType(IsTheBridgeUpApp),
+      matchesGoldenFile('goldens/alerts_blocked_fr.png'),
     );
   });
 

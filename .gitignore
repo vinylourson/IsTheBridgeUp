@@ -52,3 +52,6 @@ app.*.map.json
 # `python3 tools/gen_icons.py` rather than tracking binary churn.
 /tools/sprite_preview.png
 /tools/icon_preview.png
+
+# Ignore flutter screen capture
+flutter_*.png

@@ -21,11 +21,16 @@ class Fmt {
     final int hours = abs.inHours % 24;
     final int minutes = abs.inMinutes % 60;
 
+    // Drop a zero tail: "1h 0min" and "2d 0h" read like bugs.
     if (days > 0) {
-      return '${l10n.durationDay(days)} ${l10n.durationHour(hours)}';
+      return hours == 0
+          ? l10n.durationDay(days)
+          : '${l10n.durationDay(days)} ${l10n.durationHour(hours)}';
     }
     if (hours > 0) {
-      return '${l10n.durationHour(hours)} ${l10n.durationMinute(minutes)}';
+      return minutes == 0
+          ? l10n.durationHour(hours)
+          : '${l10n.durationHour(hours)} ${l10n.durationMinute(minutes)}';
     }
     return l10n.durationMinute(minutes);
   }

@@ -1,52 +1,79 @@
 {
   "@@locale": "en",
-
   "appTitle": "Is The Bridge Up?",
   "bridgeName": "Chaban-Delmas Bridge",
   "bridgeCity": "Bordeaux",
-
   "statusOpen": "BRIDGE OPEN",
   "statusClosed": "BRIDGE CLOSED",
   "statusUnknown": "NO DATA",
-
   "youMayCross": "You may cross",
   "takeAnotherRoute": "Take another route",
   "noDataYet": "Could not load the schedule",
-
   "nextClosureIn": "Next closure in {duration}",
   "@nextClosureIn": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "reopensIn": "Reopens in {duration}",
   "@reopensIn": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "reopensAt": "Reopens at {time}",
   "@reopensAt": {
-    "placeholders": { "time": { "type": "String" } }
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "noUpcomingClosures": "No closures scheduled",
   "closureWindow": "{start} > {end}",
   "@closureWindow": {
     "placeholders": {
-      "start": { "type": "String" },
-      "end": { "type": "String" }
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
     }
   },
-
   "durationDay": "{value}d",
-  "@durationDay": { "placeholders": { "value": { "type": "int" } } },
+  "@durationDay": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "durationHour": "{value}h",
-  "@durationHour": { "placeholders": { "value": { "type": "int" } } },
+  "@durationHour": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "durationMinute": "{value}m",
-  "@durationMinute": { "placeholders": { "value": { "type": "int" } } },
+  "@durationMinute": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "durationLessThanAMinute": "under a minute",
-
   "tabStatus": "STATUS",
   "tabSchedule": "LIST",
   "tabAlerts": "ALERTS",
   "tabInfo": "INFO",
-
   "scheduleTitle": "Next lifts",
   "scheduleEmpty": "Nothing scheduled. The feed has no closures left.",
   "maintenanceLabel": "Maintenance",
@@ -54,28 +81,87 @@
   "tomorrowLabel": "Tomorrow",
   "overnightNote": "overnight",
   "durationLabel": "{duration} closed",
-  "@durationLabel": { "placeholders": { "duration": { "type": "String" } } },
-
+  "@durationLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "inProgress": "IN PROGRESS",
-
   "refresh": "Refresh",
   "retry": "Retry",
   "loading": "Loading…",
   "updatedAt": "Updated {time}",
-  "@updatedAt": { "placeholders": { "time": { "type": "String" } } },
+  "@updatedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "offlineStale": "Offline — showing data from {time}",
-  "@offlineStale": { "placeholders": { "time": { "type": "String" } } },
+  "@offlineStale": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "refreshFailed": "Could not refresh. Showing saved data.",
-
   "alertsTitle": "Alerts",
-  "alertsUnavailableOnWeb": "Alerts need the phone app. The web version cannot schedule reminders.",
   "alertsLeadTime": "Warn me before a closure",
-
   "infoTitle": "Info",
   "infoWhat": "The Chaban-Delmas bridge lifts to let tall ships up the Garonne. When it does, the road is closed for around an hour and the detour is long. This app tells you whether you can cross.",
   "infoForecastCaveat": "These are forecasts published by Bordeaux Métropole, not a live sensor. Times can move, and a lift can be cancelled. Check before relying on it.",
   "infoTimesInParis": "All times are Bordeaux local time (Europe/Paris).",
   "infoDataSource": "Data source",
   "infoLicence": "Licence",
-  "infoOpenSourcePage": "Open the dataset page"
+  "infoOpenSourcePage": "Open the dataset page",
+  "alertsExplain": "A reminder before each closure, so you can take another route instead of finding out at the barrier.",
+  "alertsEnable": "Turn alerts on",
+  "alertsDisable": "Turn alerts off",
+  "alertsOn": "ALERTS ON",
+  "alertsOff": "ALERTS OFF",
+  "alertsAsking": "Asking…",
+  "alertsBlocked": "Notifications are blocked for this app. Turn them on in your device settings, then come back and tap Check again.",
+  "alertsRecheck": "Check again",
+  "alertsScheduled": "{count, plural, =0{No reminders scheduled} =1{1 reminder scheduled} other{{count} reminders scheduled}}",
+  "@alertsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alertsNextReminders": "Next reminders",
+  "alertsTimingNote": "Delivery can be a few minutes late: the app asks for a battery-friendly alarm rather than an exact one.",
+  "alertsWebNote": "A browser cannot post a reminder once its tab is closed, so alerts need the Android or iOS app.",
+  "notificationTitle": "Bridge closes at {time}",
+  "@notificationTitle": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationBody": "{vessel} · closed until {end}. Take another route.",
+  "@notificationBody": {
+    "placeholders": {
+      "vessel": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationBodyMaintenance": "Maintenance · closed until {end}. Take another route.",
+  "@notificationBodyMaintenance": {
+    "placeholders": {
+      "end": {
+        "type": "String"
+      }
+    }
+  }
 }

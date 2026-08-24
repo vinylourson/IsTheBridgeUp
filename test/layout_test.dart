@@ -8,8 +8,10 @@ import 'package:is_the_bridge_up/src/app.dart';
 import 'package:is_the_bridge_up/src/data/repositories/closure_repository.dart';
 import 'package:is_the_bridge_up/src/data/services/chaban_api_service.dart';
 import 'package:is_the_bridge_up/src/data/services/closure_cache_service.dart';
+import 'package:is_the_bridge_up/src/data/services/alert_preferences_service.dart';
 import 'package:is_the_bridge_up/src/data/services/notification_service.dart';
 import 'package:is_the_bridge_up/src/domain/bridge_clock.dart';
+import 'package:is_the_bridge_up/src/ui/alerts/alerts_view_model.dart';
 import 'package:is_the_bridge_up/src/ui/status/status_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -92,6 +94,16 @@ void main() {
               create: (_) =>
                   StatusViewModel(repository: repository, clock: clock),
             ),
+            // Unsupported on purpose: a widget test has no platform channels,
+            // and this also exercises the "cannot schedule here" path.
+            ChangeNotifierProvider<AlertsViewModel>(
+              create: (_) => AlertsViewModel(
+                notifications: const UnsupportedNotificationService(),
+                preferences: AlertPreferencesService(),
+                repository: repository,
+                clock: clock,
+              ),
+            ),
           ],
           child: IsTheBridgeUpApp(locale: locale),
         ),
@@ -127,7 +139,7 @@ void main() {
 
           // Every tab, since each has its own worst case.
           for (final String tab in locale.languageCode == 'fr'
-              ? const <String>['LISTE', 'ALERTES', 'INFOS', 'ÉTAT']
+              ? const <String>['LISTE', 'ALERTES', 'INFOS', 'ETAT']
               : const <String>['LIST', 'ALERTS', 'INFO', 'STATUS']) {
             await tester.tap(find.text(tab));
             await tester.pump(const Duration(seconds: 1));

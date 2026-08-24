@@ -20,8 +20,9 @@ enabled (see [Roadmap](#roadmap)).
 - **Status** — a plain OPEN / CLOSED verdict, a live countdown, and a pixel-art
   scene of the bridge that raises its span and lets a ship through.
 - **List** — every upcoming closure, with vessel names and durations.
-- **Alerts** — reminder settings. The scheduling logic is done and tested; on
-  web there is nothing to deliver it, and the screen says so.
+- **Alerts** — device reminders before a closure, on Android and iOS. Asking
+  for permission happens when you turn alerts on, not on first launch. On web
+  the screen explains why it cannot work there.
 - **Info** — attribution, licence, and the caveat that these are *forecasts*.
 
 Fully localised in **French and English**, following the device locale.
@@ -169,6 +170,12 @@ and zlib output can differ between Python versions.
 Type is `Press Start 2P` (chrome, labels, tabs) and `Silkscreen` (content and
 the verdict), both OFL and bundled.
 
+> Press Start 2P squeezes **accented capitals** into the unaccented letter's
+> box, so `É` comes out stunted. Use it only for strings without one; French
+> copy that gets upper-cased belongs in Silkscreen, which puts the accent above
+> cap height. Lowercase accents are fine in either — which is why the French
+> title reads correctly but "DÉSACTIVÉES" did not.
+
 > Pixel fonts have sparse coverage, and Google Fonts' declared `unicode-range`
 > is **not** proof a glyph exists. `→` is genuinely absent from Silkscreen and
 > rendered as tofu in both languages; Press Start 2P crams `É` into the same
@@ -206,15 +213,30 @@ when the old OpenDataSoft v1 endpoint was retired. It runs as its own
 non-blocking CI job so an upstream outage never fails a merge, but still says so
 loudly.
 
+## Alerts
+
+Reminders are scheduled on the device by `flutter_local_notifications`. Two
+decisions worth knowing:
+
+**Permission is requested from the Alerts screen**, when the user turns alerts
+on — never on launch. A prompt that appears before the app has explained itself
+gets refused, and on Android a refusal is effectively permanent.
+
+**Alarms are inexact on purpose.** Exact delivery needs `SCHEDULE_EXACT_ALARM`,
+which Android 14+ gates behind a trip to system settings and which Play Store
+review scrutinises. A warning an hour ahead does not need to-the-second
+timing, so the app asks for a battery-friendly alarm instead and says so on
+screen. Neither `SCHEDULE_EXACT_ALARM` nor `USE_EXACT_ALARM` is declared.
+
+The plugin *builds* for web — it has a web implementation and no `dart:io` —
+but `zonedSchedule` throws there, because a browser cannot run code once its
+tab is closed. `NotificationService.canSchedule` reflects that, and the screen
+explains it rather than showing a dead switch.
+
 ## Roadmap
 
 - **Android and iOS.** The code is platform-agnostic; enable the targets
   (`flutter create --platforms android,ios .`) and install the toolchains.
-- **Local notifications.** `ReminderPlanner` already decides what to schedule.
-  Delivery needs `flutter_local_notifications`, which has no web support and
-  imports `dart:io` — it is deliberately absent from `pubspec.yaml` so the web
-  build stays clean. Adding it means implementing `NotificationService` and
-  swapping one line in `main.dart`.
 - **Which bank am I on** — geolocation, picking up the idea from the abandoned
   `whereAmI` branch.
 - **Calendar export** (`.ics`).

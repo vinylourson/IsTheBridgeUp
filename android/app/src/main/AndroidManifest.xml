@@ -1,4 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required to show notifications at all on Android 13+. Requested at
+         runtime from the Alerts screen. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Pending reminders are dropped on reboot unless we can reschedule. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Deliberately NOT declaring SCHEDULE_EXACT_ALARM or USE_EXACT_ALARM:
+         an hour-ahead warning does not need to-the-second delivery, and both
+         cost either a settings trip on Android 14+ or Play Store scrutiny. -->
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
@@ -30,6 +39,20 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- flutter_local_notifications: delivers scheduled reminders, and
+             re-lays them after a reboot or an app update. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
