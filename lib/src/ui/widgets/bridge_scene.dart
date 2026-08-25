@@ -314,12 +314,16 @@ class _BridgeScenePainter extends CustomPainter {
     // scene. Drawing the posts made a picket fence, so instead there are
     // pools of warm light on the deck and a dim smear on the water.
     for (int x = 8; x < _Layout.width; x += 19) {
-      // On the road surface, not hovering above it: drawn above the deck line
-      // the pools read as small yellow objects rather than light.
-      box(x - 2, _Layout.deckY + 1, x + 2, _Layout.deckY + 1,
-          PixelPalette.lampLit);
-      box(x - 1, _Layout.deckY + 2, x + 1, _Layout.deckY + 2,
-          PixelPalette.lampGlow);
+      // Lamps over the lift span ride up with it: they are fixed to the deck
+      // that moves. Held at deck level they hung in mid-air over the open
+      // channel, which is exactly what a raised span leaves behind.
+      //
+      // Drawn on the road surface rather than above the deck line, where the
+      // pools read as small yellow objects instead of light.
+      final bool onSpan = x >= _Layout.spanX0 && x <= _Layout.spanX1;
+      final double surface = onSpan ? spanY + 2 : _Layout.deckY + 1;
+      box(x - 2, surface, x + 2, surface, PixelPalette.lampLit);
+      box(x - 1, surface + 1, x + 1, surface + 1, PixelPalette.lampGlow);
       box(x, _Layout.waterY + 2, x, _Layout.waterY + 2, PixelPalette.lampGlow);
     }
 
