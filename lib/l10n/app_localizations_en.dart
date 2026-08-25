@@ -231,4 +231,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String notificationBodyMaintenance(String end) {
     return 'Maintenance · closed until $end. Take another route.';
   }
+
+  @override
+  String get alertsLeadTimeHint =>
+      'Pick as many as you like — one closure can warn you a day ahead and again on the hour. At least one stays selected.';
+
+  @override
+  String alertsCapped(int count) {
+    return 'Only the soonest $count reminders fit; your device limits how many can be pending at once.';
+  }
+
+  @override
+  String notificationTitleOn(String day, String time) {
+    return 'Bridge closes $day at $time';
+  }
 }

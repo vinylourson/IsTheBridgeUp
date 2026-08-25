@@ -229,8 +229,23 @@ loudly.
 
 ## Alerts
 
-Reminders are scheduled on the device by `flutter_local_notifications`. Two
-decisions worth knowing:
+Reminders are scheduled on the device by `flutter_local_notifications`.
+
+Lead times are **multi-select** — 30m, 1h, 2h, 4h and 1 day — so one closure
+can warn you the day before *and* again on the hour. Deselecting the last one
+is ignored: alerts that are on with no timing would schedule nothing while
+claiming to be active.
+
+A day-ahead reminder names the day, because "closes at 14:04" is ambiguous when
+you read it the evening before. The reminder list does the same, showing the
+closure's date only when it differs from the day the reminder fires.
+
+Several leads multiply the reminder count, and iOS caps pending notifications
+at 64 per app. The planner sorts by fire time and truncates at 48, so when the
+selection overflows it is the *soonest* reminders that survive — and the screen
+says so rather than silently dropping them.
+
+Two more decisions worth knowing:
 
 **Permission is requested from the Alerts screen**, when the user turns alerts
 on — never on launch. A prompt that appears before the app has explained itself

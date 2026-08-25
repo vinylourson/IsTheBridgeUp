@@ -232,4 +232,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String notificationBodyMaintenance(String end) {
     return 'Maintenance · fermé jusqu\'à $end. Prenez un autre itinéraire.';
   }
+
+  @override
+  String get alertsLeadTimeHint =>
+      'Choisissez-en autant que vous voulez — une fermeture peut vous prévenir un jour avant, puis une heure avant. Au moins une reste sélectionnée.';
+
+  @override
+  String alertsCapped(int count) {
+    return 'Seuls les $count rappels les plus proches tiennent ; votre appareil limite le nombre de rappels en attente.';
+  }
+
+  @override
+  String notificationTitleOn(String day, String time) {
+    return 'Fermeture du pont $day à $time';
+  }
 }

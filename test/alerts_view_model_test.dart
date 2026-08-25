@@ -85,7 +85,7 @@ void main() {
     await t.vm.load();
 
     expect(t.vm.enabled, isFalse);
-    expect(t.vm.leadTime, const Duration(hours: 1));
+    expect(t.vm.leadTimes, <Duration>{const Duration(hours: 1)});
     // Critically: no permission prompt on load. Asking before the user has
     // said they want alerts gets it denied.
     expect(t.fake.requestCount, 0);
@@ -149,19 +149,23 @@ void main() {
     expect(t.vm.scheduledCount, 0);
   });
 
-  test('changing the lead time moves the reminders', () async {
+  test('adding a lead time adds reminders rather than replacing them', () async {
     final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
     t = build();
     await t.repo.load();
     await t.vm.load();
     await t.vm.setEnabled(true);
 
-    final DateTime oneHour = t.fake.scheduled.first.at;
-    await t.vm.setLeadTime(const Duration(hours: 4));
-    final DateTime fourHours = t.fake.scheduled.first.at;
+    final int withOneLead = t.fake.scheduled.length;
 
-    expect(t.vm.leadTime, const Duration(hours: 4));
-    expect(oneHour.difference(fourHours), const Duration(hours: 3));
+    await t.vm.toggleLeadTime(const Duration(days: 1));
+
+    expect(t.vm.leadTimes, hasLength(2));
+    expect(
+      t.fake.scheduled.length,
+      withOneLead * 2,
+      reason: 'each closure now warns twice',
+    );
   });
 
   test('a feed refresh re-lays the reminders', () async {
@@ -188,7 +192,7 @@ void main() {
     await first.repo.load();
     await first.vm.load();
     await first.vm.setEnabled(true);
-    await first.vm.setLeadTime(const Duration(minutes: 30));
+    await first.vm.toggleLeadTime(const Duration(minutes: 30));
 
     final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
     second = build(
@@ -200,7 +204,10 @@ void main() {
     await second.vm.load();
 
     expect(second.vm.enabled, isTrue);
-    expect(second.vm.leadTime, const Duration(minutes: 30));
+    expect(
+      second.vm.leadTimes,
+      <Duration>{const Duration(hours: 1), const Duration(minutes: 30)},
+    );
     expect(second.fake.scheduled, isNotEmpty, reason: 're-laid on launch');
   });
 
@@ -213,5 +220,31 @@ void main() {
     expect(t.vm.canSchedule, isFalse);
     await t.vm.setEnabled(true);
     expect(t.fake.scheduled, isEmpty);
+  });
+
+  test('the last lead time cannot be removed', () async {
+    final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
+    t = build();
+    await t.repo.load();
+    await t.vm.load();
+
+    expect(t.vm.leadTimes, hasLength(1));
+    // Alerts on with no timing would schedule nothing while claiming to work.
+    await t.vm.toggleLeadTime(t.vm.leadTimes.single);
+    expect(t.vm.leadTimes, hasLength(1));
+  });
+
+  test('a deselected lead time stops producing reminders', () async {
+    final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
+    t = build();
+    await t.repo.load();
+    await t.vm.load();
+    await t.vm.setEnabled(true);
+    await t.vm.toggleLeadTime(const Duration(days: 1));
+    final int withTwo = t.fake.scheduled.length;
+
+    await t.vm.toggleLeadTime(const Duration(days: 1));
+    expect(t.vm.leadTimes, hasLength(1));
+    expect(t.fake.scheduled.length, lessThan(withTwo));
   });
 }
