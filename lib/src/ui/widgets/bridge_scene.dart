@@ -211,17 +211,41 @@ class _BridgeScenePainter extends CustomPainter {
       }
     }
 
-    // The ship is painted before the structure so the towers occlude it.
+    // The ship passes *through* the bridge, so it is confined to the
+    // navigation channel between the piers and painted before the structure,
+    // letting the piers occlude it as it enters and leaves.
+    //
+    // Without the clip it sailed the full width, and since its superstructure
+    // sits at roadway height it appeared to plough through the approach decks
+    // on both banks rather than pass under the raised span.
     if (lift > 0.35 && !maintenance) {
       final PixelMatrix ship = PixelMatrix.of(PixelSprites.ship);
+      const int channelLeft = _Layout.leftTowerX0;
+      const int channelRight = _Layout.rightTowerX1;
+      const int channelWidth = channelRight - channelLeft + 1;
+
+      // Travel spans exactly one passage: fully hidden behind one pier to
+      // fully hidden behind the other, so the crossing fills the whole loop
+      // instead of the ship idling off-screen for most of it.
       final double shipX = animate
-          ? -ship.width + drift * (_Layout.width + ship.width)
-          : (_Layout.width - ship.width) / 2;
+          ? channelLeft - ship.width + drift * (channelWidth + ship.width)
+          : channelLeft + (channelWidth - ship.width) / 2;
+
+      canvas.save();
+      canvas.clipRect(
+        Rect.fromLTRB(
+          channelLeft * px,
+          0,
+          (channelRight + 1) * px,
+          size.height,
+        ),
+      );
       ship.paint(
         canvas,
         Offset(shipX * px, (_Layout.waterY - ship.height + 3) * px),
         px,
       );
+      canvas.restore();
     }
 
     // Approach decks on both banks.
