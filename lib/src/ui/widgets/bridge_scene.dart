@@ -211,18 +211,8 @@ class _BridgeScenePainter extends CustomPainter {
       }
     }
 
-    // The ship is painted before the structure so the towers occlude it.
-    if (lift > 0.35 && !maintenance) {
-      final PixelMatrix ship = PixelMatrix.of(PixelSprites.ship);
-      final double shipX = animate
-          ? -ship.width + drift * (_Layout.width + ship.width)
-          : (_Layout.width - ship.width) / 2;
-      ship.paint(
-        canvas,
-        Offset(shipX * px, (_Layout.waterY - ship.height + 3) * px),
-        px,
-      );
-    }
+    // Far half of the ship: it arrives on the other side of the bridge.
+    _paintShip(canvas, px, size, near: false);
 
     // Approach decks on both banks.
     for (final (num a, num b) in <(num, num)>[
@@ -290,12 +280,16 @@ class _BridgeScenePainter extends CustomPainter {
     // scene. Drawing the posts made a picket fence, so instead there are
     // pools of warm light on the deck and a dim smear on the water.
     for (int x = 8; x < _Layout.width; x += 19) {
-      // On the road surface, not hovering above it: drawn above the deck line
-      // the pools read as small yellow objects rather than light.
-      box(x - 2, _Layout.deckY + 1, x + 2, _Layout.deckY + 1,
-          PixelPalette.lampLit);
-      box(x - 1, _Layout.deckY + 2, x + 1, _Layout.deckY + 2,
-          PixelPalette.lampGlow);
+      // Lamps over the lift span ride up with it: they are fixed to the deck
+      // that moves. Held at deck level they hung in mid-air over the open
+      // channel, which is exactly what a raised span leaves behind.
+      //
+      // Drawn on the road surface rather than above the deck line, where the
+      // pools read as small yellow objects instead of light.
+      final bool onSpan = x >= _Layout.spanX0 && x <= _Layout.spanX1;
+      final double surface = onSpan ? spanY + 2 : _Layout.deckY + 1;
+      box(x - 2, surface, x + 2, surface, PixelPalette.lampLit);
+      box(x - 1, surface + 1, x + 1, surface + 1, PixelPalette.lampGlow);
       box(x, _Layout.waterY + 2, x, _Layout.waterY + 2, PixelPalette.lampGlow);
     }
 
@@ -307,11 +301,57 @@ class _BridgeScenePainter extends CustomPainter {
       box(x, _Layout.towerTop + 1, x, _Layout.towerTop + 1, PixelPalette.beacon);
     }
 
+    // Near half of the ship, over the structure: it leaves on our side.
+    _paintShip(canvas, px, size, near: true);
+
     if (lift < 0.05) {
       _paintTraffic(canvas, px);
     } else if (maintenance) {
       _paintCones(canvas, px);
     }
+  }
+
+  /// The ship crossing the bridge's plane: far side coming in, near side
+  /// going out.
+  ///
+  /// A flat side elevation has no way to show something passing *through* a
+  /// structure. Confining the ship to the navigation channel only made it
+  /// appear and disappear behind the piers -- still visibly behind the bridge
+  /// the whole way. Splitting it at the bridge's centre line and painting the
+  /// halves either side of the structure reads as a diagonal pass: it arrives
+  /// beyond the bridge and leaves in front of it.
+  ///
+  /// The seam is invisible because the centre line sits in the open channel,
+  /// where there is nothing at hull height to occlude or be occluded. The
+  /// effect only becomes visible at the piers, which is where it should.
+  void _paintShip(
+    Canvas canvas,
+    double px,
+    Size size, {
+    required bool near,
+  }) {
+    if (lift <= 0.35 || maintenance) return;
+
+    final PixelMatrix ship = PixelMatrix.of(PixelSprites.ship);
+    const double centreX = (_Layout.spanX0 + _Layout.spanX1 + 1) / 2;
+
+    final double shipX = animate
+        ? -ship.width + drift * (_Layout.width + ship.width)
+        // At rest, straddle the centre line so both halves of the effect show.
+        : centreX - ship.width / 2;
+
+    canvas.save();
+    canvas.clipRect(
+      near
+          ? Rect.fromLTRB(centreX * px, 0, size.width, size.height)
+          : Rect.fromLTRB(0, 0, centreX * px, size.height),
+    );
+    ship.paint(
+      canvas,
+      Offset(shipX * px, (_Layout.waterY - ship.height + 3) * px),
+      px,
+    );
+    canvas.restore();
   }
 
   /// Everything crossing while the bridge is open.

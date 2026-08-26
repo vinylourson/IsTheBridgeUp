@@ -23,16 +23,13 @@ class AlertsViewModel extends ChangeNotifier {
   final ClosureRepository _repository;
   final BridgeClock _clock;
 
-  static const List<Duration> leadTimeOptions = <Duration>[
-    Duration(minutes: 30),
-    Duration(hours: 1),
-    Duration(hours: 2),
-    Duration(hours: 4),
-  ];
+  /// Offered by the planner, so the list and the rules cannot disagree.
+  static const List<Duration> leadTimeOptions =
+      ReminderPlanner.leadTimeOptions;
 
   static const ReminderPlanner _planner = ReminderPlanner();
 
-  AlertPreferences _prefs = const AlertPreferences.defaults();
+  AlertPreferences _prefs = AlertPreferences.defaults();
   NotificationPermission _permission = NotificationPermission.unknown;
   int _scheduled = 0;
   bool _busy = false;
@@ -44,7 +41,7 @@ class AlertsViewModel extends ChangeNotifier {
 
   bool get canSchedule => _notifications.canSchedule;
   bool get enabled => _prefs.enabled;
-  Duration get leadTime => _prefs.leadTime;
+  Set<Duration> get leadTimes => _prefs.leadTimes;
   NotificationPermission get permission => _permission;
   int get scheduledCount => _scheduled;
   bool get busy => _busy;
@@ -59,8 +56,13 @@ class AlertsViewModel extends ChangeNotifier {
   List<Reminder> get planned => _planner.plan(
     closures: _repository.closures,
     now: _clock.now(),
-    leadTime: _prefs.leadTime,
+    leadTimes: _prefs.leadTimes,
   );
+
+  /// True when the selection produced more reminders than the OS will hold, so
+  /// the list is the soonest ones rather than all of them.
+  bool get truncated =>
+      planned.length >= ReminderPlanner.maxReminders;
 
   void attachText(ReminderText text) => _text = text;
 
@@ -103,9 +105,20 @@ class AlertsViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> setLeadTime(Duration value) async {
-    if (_busy || value == _prefs.leadTime) return;
-    _prefs = _prefs.copyWith(leadTime: value);
+  /// Adds or removes one lead time.
+  ///
+  /// Removing the last one is ignored: alerts that are on but have no timing
+  /// would schedule nothing while claiming to be active.
+  Future<void> toggleLeadTime(Duration value) async {
+    if (_busy) return;
+    final Set<Duration> next = Set<Duration>.of(_prefs.leadTimes);
+    if (next.contains(value)) {
+      if (next.length == 1) return;
+      next.remove(value);
+    } else {
+      next.add(value);
+    }
+    _prefs = _prefs.copyWith(leadTimes: next);
     await _preferences.write(_prefs);
     notifyListeners();
     if (_prefs.enabled) await _reschedule();

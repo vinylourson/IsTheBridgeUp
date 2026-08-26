@@ -457,6 +457,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maintenance · closed until {end}. Take another route.'**
   String notificationBodyMaintenance(String end);
+
+  /// No description provided for @alertsLeadTimeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick as many as you like — one closure can warn you a day ahead and again on the hour. At least one stays selected.'**
+  String get alertsLeadTimeHint;
+
+  /// No description provided for @alertsCapped.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the soonest {count} reminders fit; your device limits how many can be pending at once.'**
+  String alertsCapped(int count);
+
+  /// No description provided for @notificationTitleOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Bridge closes {day} at {time}'**
+  String notificationTitleOn(String day, String time);
 }
 
 class _AppLocalizationsDelegate

@@ -163,5 +163,25 @@
         "type": "String"
       }
     }
+  },
+  "alertsLeadTimeHint": "Pick as many as you like — one closure can warn you a day ahead and again on the hour. At least one stays selected.",
+  "alertsCapped": "Only the soonest {count} reminders fit; your device limits how many can be pending at once.",
+  "@alertsCapped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationTitleOn": "Bridge closes {day} at {time}",
+  "@notificationTitleOn": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

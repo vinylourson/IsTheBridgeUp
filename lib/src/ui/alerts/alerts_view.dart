@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../../l10n/app_localizations.dart';
 import '../../data/services/notification_service.dart';
@@ -34,11 +35,28 @@ class _AlertsViewState extends State<AlertsView> {
 
     // Re-attached on every locale change so a scheduled reminder is written in
     // the language the app is showing.
-    vm.attachText(
-      (Reminder reminder) => (
-        title: l10n.notificationTitle(
-          Fmt.time(locale, reminder.closure.start),
-        ),
+    vm.attachText((Reminder reminder) {
+      final tz.TZDateTime start = reminder.closure.start;
+      final tz.TZDateTime firesAt = tz.TZDateTime.from(
+        reminder.at,
+        start.location,
+      );
+      // A day-ahead reminder has to name the day: "closes at 14:04" is
+      // ambiguous when you are reading it the evening before. The day is
+      // relative to when the notification fires, not to now.
+      final bool sameDay =
+          start.year == firesAt.year &&
+          start.month == firesAt.month &&
+          start.day == firesAt.day;
+
+      final String time = Fmt.time(locale, start);
+      return (
+        title: sameDay
+            ? l10n.notificationTitle(time)
+            : l10n.notificationTitleOn(
+                Fmt.day(l10n, locale, start, firesAt),
+                time,
+              ),
         body: reminder.closure.isMaintenance
             ? l10n.notificationBodyMaintenance(
                 Fmt.time(locale, reminder.closure.end),
@@ -47,8 +65,8 @@ class _AlertsViewState extends State<AlertsView> {
                 reminder.closure.vessels.join(' · '),
                 Fmt.time(locale, reminder.closure.end),
               ),
-      ),
-    );
+      );
+    });
 
     if (!_loadStarted) {
       _loadStarted = true;
@@ -94,6 +112,16 @@ class _AlertsViewState extends State<AlertsView> {
           const SizedBox(height: 12),
           _Upcoming(vm: vm, locale: locale),
           const SizedBox(height: 12),
+          if (vm.truncated)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                l10n.alertsCapped(ReminderPlanner.maxReminders),
+                style: PixelText.bodySmall.copyWith(
+                  color: PixelPalette.warning,
+                ),
+              ),
+            ),
           Text(
             l10n.alertsTimingNote,
             style: PixelText.bodySmall.copyWith(color: PixelPalette.inkFaint),
@@ -161,16 +189,28 @@ class _LeadTime extends StatelessWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     return PixelPanel(
       title: l10n.alertsLeadTime,
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          for (final Duration lead in AlertsViewModel.leadTimeOptions)
-            PixelButton(
-              label: Fmt.duration(l10n, lead),
-              selected: lead == vm.leadTime,
-              onPressed: vm.busy ? null : () => vm.setLeadTime(lead),
-            ),
+          // Several at once: a day-ahead heads-up and an hour-ahead warning
+          // are useful for different reasons.
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              for (final Duration lead in AlertsViewModel.leadTimeOptions)
+                PixelButton(
+                  label: Fmt.duration(l10n, lead),
+                  selected: vm.leadTimes.contains(lead),
+                  onPressed: vm.busy ? null : () => vm.toggleLeadTime(lead),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            l10n.alertsLeadTimeHint,
+            style: PixelText.bodySmall.copyWith(color: PixelPalette.inkFaint),
+          ),
         ],
       ),
     );
@@ -184,6 +224,26 @@ class _Upcoming extends StatelessWidget {
 
   final AlertsViewModel vm;
   final String locale;
+
+  /// "when it fires  >  which closure".
+  ///
+  /// The closure keeps its date only when it falls on a different day, which
+  /// a day-ahead lead makes common: "17:49 > 17:49" reads like a mistake.
+  static String _rowFor(Reminder reminder, String locale) {
+    final tz.TZDateTime start = reminder.closure.start;
+    final tz.TZDateTime firesAt = tz.TZDateTime.from(
+      reminder.at,
+      start.location,
+    );
+    final bool sameDay =
+        start.year == firesAt.year &&
+        start.month == firesAt.month &&
+        start.day == firesAt.day;
+    final String target = sameDay
+        ? Fmt.time(locale, start)
+        : Fmt.stamp(locale, start);
+    return '${Fmt.stamp(locale, firesAt)}  >  $target';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -203,12 +263,8 @@ class _Upcoming extends StatelessWidget {
                 for (final Reminder reminder in planned.take(5))
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4),
-                    // The reminder time, then the closure it warns about.
-                    // Repeating the lead time on every row was just noise --
-                    // it is already set in the panel above.
                     child: Text(
-                      '${Fmt.stamp(locale, reminder.at)}'
-                      '  >  ${Fmt.time(locale, reminder.closure.start)}',
+                      _rowFor(reminder, locale),
                       style: PixelText.bodySmall.copyWith(
                         color: PixelPalette.inkDim,
                       ),

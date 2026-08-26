@@ -19,6 +19,7 @@ import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'golden/test_fonts.dart';
+import 'support/fake_notifications.dart';
 
 const List<Map<String, String>> _records = <Map<String, String>>[
   <String, String>{
@@ -60,6 +61,7 @@ void main() {
     Size size, {
     required DateTime now,
     required Locale locale,
+    NotificationService notifications = const UnsupportedNotificationService(),
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
@@ -98,7 +100,7 @@ void main() {
             // and this also exercises the "cannot schedule here" path.
             ChangeNotifierProvider<AlertsViewModel>(
               create: (_) => AlertsViewModel(
-                notifications: const UnsupportedNotificationService(),
+                notifications: notifications,
                 preferences: AlertPreferencesService(),
                 repository: repository,
                 clock: clock,
@@ -149,6 +151,29 @@ void main() {
       );
     }
   }
+
+  testWidgets('the lead-time panel fits the smallest screen', (
+    WidgetTester tester,
+  ) async {
+    // The web path hides this panel, so the default provider never exercised
+    // it. Five lead-time chips plus the French hint is the tight case.
+    await pumpAt(
+      tester,
+      const Size(320, 568),
+      now: DateTime.utc(2026, 8, 23, 4),
+      locale: const Locale('fr'),
+      notifications: FakeNotifications(
+        initialPermission: NotificationPermission.granted,
+      ),
+    );
+    await tester.tap(find.text('ALERTES'));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Activer les alertes'));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('1j'));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('closed state has no overflow on the smallest screen', (
     WidgetTester tester,

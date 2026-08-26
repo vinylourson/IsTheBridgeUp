@@ -218,6 +218,10 @@ void main() {
     await tester.tap(find.text('Turn alerts on'));
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('ALERTS ON'), findsOne);
+    // Add a day-ahead lead alongside the default hour, so the golden shows
+    // more than one selected.
+    await tester.tap(find.text('1d'));
+    await tester.pump(const Duration(seconds: 1));
     await expectLater(
       find.byType(IsTheBridgeUpApp),
       matchesGoldenFile('goldens/alerts_on_en.png'),

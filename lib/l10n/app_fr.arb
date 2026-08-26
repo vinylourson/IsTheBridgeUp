@@ -59,5 +59,8 @@
   "alertsWebNote": "Un navigateur ne peut pas envoyer de rappel une fois son onglet fermé. Les alertes nécessitent l'application Android ou iOS.",
   "notificationTitle": "Fermeture du pont à {time}",
   "notificationBody": "{vessel} · fermé jusqu'à {end}. Prenez un autre itinéraire.",
-  "notificationBodyMaintenance": "Maintenance · fermé jusqu'à {end}. Prenez un autre itinéraire."
+  "notificationBodyMaintenance": "Maintenance · fermé jusqu'à {end}. Prenez un autre itinéraire.",
+  "alertsLeadTimeHint": "Choisissez-en autant que vous voulez — une fermeture peut vous prévenir un jour avant, puis une heure avant. Au moins une reste sélectionnée.",
+  "alertsCapped": "Seuls les {count} rappels les plus proches tiennent ; votre appareil limite le nombre de rappels en attente.",
+  "notificationTitleOn": "Fermeture du pont {day} à {time}"
 }
