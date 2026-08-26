@@ -211,42 +211,8 @@ class _BridgeScenePainter extends CustomPainter {
       }
     }
 
-    // The ship passes *through* the bridge, so it is confined to the
-    // navigation channel between the piers and painted before the structure,
-    // letting the piers occlude it as it enters and leaves.
-    //
-    // Without the clip it sailed the full width, and since its superstructure
-    // sits at roadway height it appeared to plough through the approach decks
-    // on both banks rather than pass under the raised span.
-    if (lift > 0.35 && !maintenance) {
-      final PixelMatrix ship = PixelMatrix.of(PixelSprites.ship);
-      const int channelLeft = _Layout.leftTowerX0;
-      const int channelRight = _Layout.rightTowerX1;
-      const int channelWidth = channelRight - channelLeft + 1;
-
-      // Travel spans exactly one passage: fully hidden behind one pier to
-      // fully hidden behind the other, so the crossing fills the whole loop
-      // instead of the ship idling off-screen for most of it.
-      final double shipX = animate
-          ? channelLeft - ship.width + drift * (channelWidth + ship.width)
-          : channelLeft + (channelWidth - ship.width) / 2;
-
-      canvas.save();
-      canvas.clipRect(
-        Rect.fromLTRB(
-          channelLeft * px,
-          0,
-          (channelRight + 1) * px,
-          size.height,
-        ),
-      );
-      ship.paint(
-        canvas,
-        Offset(shipX * px, (_Layout.waterY - ship.height + 3) * px),
-        px,
-      );
-      canvas.restore();
-    }
+    // Far half of the ship: it arrives on the other side of the bridge.
+    _paintShip(canvas, px, size, near: false);
 
     // Approach decks on both banks.
     for (final (num a, num b) in <(num, num)>[
@@ -335,11 +301,57 @@ class _BridgeScenePainter extends CustomPainter {
       box(x, _Layout.towerTop + 1, x, _Layout.towerTop + 1, PixelPalette.beacon);
     }
 
+    // Near half of the ship, over the structure: it leaves on our side.
+    _paintShip(canvas, px, size, near: true);
+
     if (lift < 0.05) {
       _paintTraffic(canvas, px);
     } else if (maintenance) {
       _paintCones(canvas, px);
     }
+  }
+
+  /// The ship crossing the bridge's plane: far side coming in, near side
+  /// going out.
+  ///
+  /// A flat side elevation has no way to show something passing *through* a
+  /// structure. Confining the ship to the navigation channel only made it
+  /// appear and disappear behind the piers -- still visibly behind the bridge
+  /// the whole way. Splitting it at the bridge's centre line and painting the
+  /// halves either side of the structure reads as a diagonal pass: it arrives
+  /// beyond the bridge and leaves in front of it.
+  ///
+  /// The seam is invisible because the centre line sits in the open channel,
+  /// where there is nothing at hull height to occlude or be occluded. The
+  /// effect only becomes visible at the piers, which is where it should.
+  void _paintShip(
+    Canvas canvas,
+    double px,
+    Size size, {
+    required bool near,
+  }) {
+    if (lift <= 0.35 || maintenance) return;
+
+    final PixelMatrix ship = PixelMatrix.of(PixelSprites.ship);
+    const double centreX = (_Layout.spanX0 + _Layout.spanX1 + 1) / 2;
+
+    final double shipX = animate
+        ? -ship.width + drift * (_Layout.width + ship.width)
+        // At rest, straddle the centre line so both halves of the effect show.
+        : centreX - ship.width / 2;
+
+    canvas.save();
+    canvas.clipRect(
+      near
+          ? Rect.fromLTRB(centreX * px, 0, size.width, size.height)
+          : Rect.fromLTRB(0, 0, centreX * px, size.height),
+    );
+    ship.paint(
+      canvas,
+      Offset(shipX * px, (_Layout.waterY - ship.height + 3) * px),
+      px,
+    );
+    canvas.restore();
   }
 
   /// Everything crossing while the bridge is open.
