@@ -43,4 +43,5 @@ class CacheKeys {
 
   static const String alertsEnabled = 'chaban.alerts.enabled.v1';
   static const String alertsLeadMinutes = 'chaban.alerts.leadMinutes.v1';
+  static const String alertsReopening = 'chaban.alerts.reopening.v1';
 }

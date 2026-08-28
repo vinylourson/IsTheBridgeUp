@@ -1,3 +1,5 @@
+import 'dart:ui' show Color;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -53,10 +55,23 @@ class LocalNotificationService implements NotificationService {
   final FlutterLocalNotificationsPlugin _plugin;
   bool _initialised = false;
 
-  static const String _channelId = 'chaban.closures';
-  static const String _channelName = 'Bridge closures';
-  static const String _channelDescription =
+  // Two channels rather than one, so Android's own notification settings let
+  // you keep the closing warnings and silence the reopening ones, or the
+  // reverse, without turning the app's alerts off entirely.
+  static const String _closingChannelId = 'chaban.closures';
+  static const String _closingChannelName = 'Bridge closures';
+  static const String _closingChannelDescription =
       'Warnings before the Chaban-Delmas bridge closes to traffic.';
+
+  static const String _reopeningChannelId = 'chaban.reopenings';
+  static const String _reopeningChannelName = 'Bridge reopenings';
+  static const String _reopeningChannelDescription =
+      'Told when the Chaban-Delmas bridge reopens to traffic.';
+
+  /// Tints the status-bar icon and the notification accent. Matches
+  /// PixelPalette.open; duplicated rather than imported so this service keeps
+  /// no dependency on the UI layer.
+  static const Color _accent = Color(0xFF9AD284);
 
   /// The plugin builds for web, but `zonedSchedule` throws there: a browser
   /// cannot run code to post a notification once the tab is closed.
@@ -68,7 +83,11 @@ class LocalNotificationService implements NotificationService {
     if (_initialised) return;
     await _plugin.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        // NOT the launcher icon: Android builds the status-bar icon from the
+        // alpha channel alone and paints every opaque pixel white, so an
+        // opaque launcher icon arrives as a featureless white blob.
+        // ic_stat_bridge is a transparent silhouette drawn for the purpose.
+        android: AndroidInitializationSettings('ic_stat_bridge'),
         // Permission is requested from the Alerts screen instead of here, so
         // the prompt appears when the user asks for alerts. Asking on first
         // launch, before the app has explained itself, gets it denied.
@@ -146,20 +165,10 @@ class LocalNotificationService implements NotificationService {
     // reconciling individual ids would be more code and more ways to be wrong.
     await cancelAll();
 
-    const NotificationDetails details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
-        importance: Importance.high,
-        priority: Priority.high,
-      ),
-      iOS: DarwinNotificationDetails(),
-    );
-
     for (int i = 0; i < reminders.length; i++) {
       final Reminder reminder = reminders[i];
       final ({String title, String body}) copy = text(reminder);
+      final NotificationDetails details = _detailsFor(reminder.kind);
       await _plugin.zonedSchedule(
         id: i,
         scheduledDate: tz.TZDateTime.from(
@@ -177,6 +186,33 @@ class LocalNotificationService implements NotificationService {
       );
     }
   }
+
+  static NotificationDetails _detailsFor(ReminderKind kind) => switch (kind) {
+    ReminderKind.closing => const NotificationDetails(
+      android: AndroidNotificationDetails(
+        _closingChannelId,
+        _closingChannelName,
+        channelDescription: _closingChannelDescription,
+        importance: Importance.high,
+        priority: Priority.high,
+        color: _accent,
+      ),
+      iOS: DarwinNotificationDetails(),
+    ),
+    // Lower importance: reopening is good news, not something to interrupt
+    // for. It still posts, it just does not push itself in front of you.
+    ReminderKind.reopening => const NotificationDetails(
+      android: AndroidNotificationDetails(
+        _reopeningChannelId,
+        _reopeningChannelName,
+        channelDescription: _reopeningChannelDescription,
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
+        color: _accent,
+      ),
+      iOS: DarwinNotificationDetails(),
+    ),
+  };
 
   @override
   Future<void> cancelAll() async {

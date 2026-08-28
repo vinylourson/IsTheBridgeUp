@@ -42,6 +42,7 @@ class AlertsViewModel extends ChangeNotifier {
   bool get canSchedule => _notifications.canSchedule;
   bool get enabled => _prefs.enabled;
   Set<Duration> get leadTimes => _prefs.leadTimes;
+  bool get notifyReopening => _prefs.notifyReopening;
   NotificationPermission get permission => _permission;
   int get scheduledCount => _scheduled;
   bool get busy => _busy;
@@ -57,6 +58,7 @@ class AlertsViewModel extends ChangeNotifier {
     closures: _repository.closures,
     now: _clock.now(),
     leadTimes: _prefs.leadTimes,
+    notifyReopening: _prefs.notifyReopening,
   );
 
   /// True when the selection produced more reminders than the OS will hold, so
@@ -119,6 +121,14 @@ class AlertsViewModel extends ChangeNotifier {
       next.add(value);
     }
     _prefs = _prefs.copyWith(leadTimes: next);
+    await _preferences.write(_prefs);
+    notifyListeners();
+    if (_prefs.enabled) await _reschedule();
+  }
+
+  Future<void> setNotifyReopening(bool value) async {
+    if (_busy || value == _prefs.notifyReopening) return;
+    _prefs = _prefs.copyWith(notifyReopening: value);
     await _preferences.write(_prefs);
     notifyListeners();
     if (_prefs.enabled) await _reschedule();

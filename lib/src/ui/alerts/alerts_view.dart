@@ -49,6 +49,13 @@ class _AlertsViewState extends State<AlertsView> {
           start.month == firesAt.month &&
           start.day == firesAt.day;
 
+      if (reminder.kind == ReminderKind.reopening) {
+        return (
+          title: l10n.notificationReopenedTitle,
+          body: l10n.notificationReopenedBody,
+        );
+      }
+
       final String time = Fmt.time(locale, start);
       return (
         title: sameDay
@@ -109,6 +116,8 @@ class _AlertsViewState extends State<AlertsView> {
           ],
           const SizedBox(height: 12),
           _LeadTime(vm: vm),
+          const SizedBox(height: 12),
+          _Reopening(vm: vm),
           const SizedBox(height: 12),
           _Upcoming(vm: vm, locale: locale),
           const SizedBox(height: 12),
@@ -217,6 +226,39 @@ class _LeadTime extends StatelessWidget {
   }
 }
 
+/// The other half of the question: not just when you cannot cross, but when
+/// you can again.
+class _Reopening extends StatelessWidget {
+  const _Reopening({required this.vm});
+
+  final AlertsViewModel vm;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    return PixelPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          PixelButton(
+            label: l10n.alertsReopening,
+            selected: vm.notifyReopening,
+            expand: true,
+            onPressed: vm.busy
+                ? null
+                : () => vm.setNotifyReopening(!vm.notifyReopening),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            l10n.alertsReopeningHint,
+            style: PixelText.bodySmall.copyWith(color: PixelPalette.inkFaint),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// When the next few reminders would fire — so "alerts on" is verifiable
 /// rather than a claim.
 class _Upcoming extends StatelessWidget {
@@ -229,7 +271,11 @@ class _Upcoming extends StatelessWidget {
   ///
   /// The closure keeps its date only when it falls on a different day, which
   /// a day-ahead lead makes common: "17:49 > 17:49" reads like a mistake.
-  static String _rowFor(Reminder reminder, String locale) {
+  static String _rowFor(
+    Reminder reminder,
+    String locale,
+    AppLocalizations l10n,
+  ) {
     final tz.TZDateTime start = reminder.closure.start;
     final tz.TZDateTime firesAt = tz.TZDateTime.from(
       reminder.at,
@@ -239,6 +285,11 @@ class _Upcoming extends StatelessWidget {
         start.year == firesAt.year &&
         start.month == firesAt.month &&
         start.day == firesAt.day;
+    if (reminder.kind == ReminderKind.reopening) {
+      // Fires at the reopening itself, so there is no "warns about" target to
+      // point at -- the arrow would point at its own timestamp.
+      return '${Fmt.stamp(locale, firesAt)}  >  ${l10n.alertsRowReopens}';
+    }
     final String target = sameDay
         ? Fmt.time(locale, start)
         : Fmt.stamp(locale, start);
@@ -264,7 +315,7 @@ class _Upcoming extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
-                      _rowFor(reminder, locale),
+                      _rowFor(reminder, locale, l10n),
                       style: PixelText.bodySmall.copyWith(
                         color: PixelPalette.inkDim,
                       ),

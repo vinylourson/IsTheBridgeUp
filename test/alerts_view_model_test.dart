@@ -247,4 +247,53 @@ void main() {
     expect(t.vm.leadTimes, hasLength(1));
     expect(t.fake.scheduled.length, lessThan(withTwo));
   });
+
+  test('reopening alerts are opt-in, and add a reminder per closure', () async {
+    final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
+    t = build();
+    await t.repo.load();
+    await t.vm.load();
+    await t.vm.setEnabled(true);
+
+    expect(t.vm.notifyReopening, isFalse, reason: 'opt-in, not a default');
+    final int closingOnly = t.fake.scheduled.length;
+
+    await t.vm.setNotifyReopening(true);
+
+    expect(t.vm.notifyReopening, isTrue);
+    expect(t.fake.scheduled.length, closingOnly * 2);
+    expect(
+      t.fake.scheduled.where((Reminder r) => r.kind == ReminderKind.reopening),
+      hasLength(closingOnly),
+    );
+  });
+
+  test('turning reopening back off removes those reminders', () async {
+    final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
+    t = build();
+    await t.repo.load();
+    await t.vm.load();
+    await t.vm.setEnabled(true);
+    await t.vm.setNotifyReopening(true);
+
+    await t.vm.setNotifyReopening(false);
+    expect(
+      t.fake.scheduled.any((Reminder r) => r.kind == ReminderKind.reopening),
+      isFalse,
+    );
+  });
+
+  test('the reopening preference survives a restart', () async {
+    final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
+    first = build();
+    await first.repo.load();
+    await first.vm.load();
+    await first.vm.setNotifyReopening(true);
+
+    final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
+    second = build();
+    await second.repo.load();
+    await second.vm.load();
+    expect(second.vm.notifyReopening, isTrue);
+  });
 }

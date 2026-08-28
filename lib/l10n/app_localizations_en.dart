@@ -245,4 +245,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String notificationTitleOn(String day, String time) {
     return 'Bridge closes $day at $time';
   }
+
+  @override
+  String get alertsReopening => 'Tell me when it reopens';
+
+  @override
+  String get alertsReopeningHint =>
+      'A second notification the moment the bridge is back open, so you know when to set off.';
+
+  @override
+  String get notificationReopenedTitle => 'Bridge reopened';
+
+  @override
+  String get notificationReopenedBody => 'You can cross again.';
+
+  @override
+  String get alertsRowReopens => 'REOPENS';
 }

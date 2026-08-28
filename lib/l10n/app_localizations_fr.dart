@@ -246,4 +246,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String notificationTitleOn(String day, String time) {
     return 'Fermeture du pont $day à $time';
   }
+
+  @override
+  String get alertsReopening => 'Me prévenir à la réouverture';
+
+  @override
+  String get alertsReopeningHint =>
+      'Une seconde notification au moment où le pont rouvre, pour savoir quand partir.';
+
+  @override
+  String get notificationReopenedTitle => 'Pont rouvert';
+
+  @override
+  String get notificationReopenedBody => 'Vous pouvez de nouveau traverser.';
+
+  @override
+  String get alertsRowReopens => 'ROUVRE';
 }
