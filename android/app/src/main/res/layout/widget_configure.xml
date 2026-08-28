@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/widget_bg"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/widget_config_title"
+        android:textColor="@color/widget_accent"
+        android:textSize="16sp"
+        android:fontFamily="monospace"
+        android:paddingBottom="4dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/widget_config_hint"
+        android:textColor="@color/widget_ink_dim"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:paddingBottom="16dp" />
+
+    <Button android:id="@+id/choice_1"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/widget_config_1" />
+    <Button android:id="@+id/choice_3"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/widget_config_3" />
+    <Button android:id="@+id/choice_5"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/widget_config_5" />
+    <Button android:id="@+id/choice_10"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/widget_config_10" />
+</LinearLayout>

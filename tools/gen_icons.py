@@ -196,6 +196,62 @@ def wordmark(scale=8, text='IS THE BRIDGE UP?'):
     return out
 
 
+# ---- Android status-bar icon ----
+#
+# Android builds the notification small icon from the ALPHA CHANNEL alone:
+# every opaque pixel is painted flat white, whatever colour it was. Handing it
+# the launcher icon -- opaque azure, corner to corner -- therefore produced a
+# solid white blob in the status bar.
+#
+# Drawn on a 12x12 grid because 12 divides every notification-icon density
+# exactly: mdpi 24 (x2), hdpi 36 (x3), xhdpi 48 (x4), xxhdpi 72 (x6),
+# xxxhdpi 96 (x8). Only the silhouette matters, so it is the bridge reduced to
+# the one shape that is unmistakably this bridge: two pylons and a raised deck.
+
+STAT_SIZE = 12
+
+
+def stat_icon():
+    g = G(STAT_SIZE, STAT_SIZE)
+    for x0 in (2, 8):                       # two pylons, rising past the deck
+        g.rect(x0, 0, x0 + 1, 9, 'W', fill=True)
+    g.rect(4, 3, 7, 4, 'W', fill=True)      # the span, held high
+    # Approach roadway either side, with the channel left open between them.
+    # That gap is what stops the glyph reading as the letter H: the deck is
+    # missing precisely where the span has lifted out of it.
+    g.rect(0, 9, 3, 9, 'W', fill=True)
+    g.rect(8, 9, 11, 9, 'W', fill=True)
+    return g
+
+
+def render_stat(grid, scale):
+    """White-on-transparent: Android only reads alpha, so colour is moot."""
+    rows = grid.rows()
+    n = STAT_SIZE * scale
+    clear = (0, 0, 0, 0)
+    out = [[clear] * n for _ in range(n)]
+    for y in range(STAT_SIZE):
+        for x in range(STAT_SIZE):
+            if rows[y][x] == '.':
+                continue
+            for dy in range(scale):
+                row = out[y * scale + dy]
+                row[x * scale:x * scale + scale] = [(255, 255, 255, 255)] * scale
+    return out
+
+
+def emit_stat_icons(root):
+    grid = stat_icon()
+    for density, scale in (('mdpi', 2), ('hdpi', 3), ('xhdpi', 4),
+                           ('xxhdpi', 6), ('xxxhdpi', 8)):
+        rel = f'android/app/src/main/res/drawable-{density}/ic_stat_bridge.png'
+        path = os.path.join(root, rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        write_png(path, render_stat(grid, scale))
+        print(f'  {rel:66} {STAT_SIZE * scale}x{STAT_SIZE * scale}')
+    write_png(os.path.join(root, 'tools/stat_preview.png'), render_stat(grid, 16))
+
+
 if __name__ == '__main__':
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     grid = icon()
@@ -255,6 +311,8 @@ if __name__ == '__main__':
 </resources>
 ''')
     print('  android/.../mipmap-anydpi-v26/ic_launcher.xml + values/ic_launcher_background.xml')
+
+    emit_stat_icons(root)
 
     write_png(os.path.join(root, 'tools/icon_preview.png'), render(grid, 14))
     write_png(os.path.join(root, 'docs/wordmark.png'), wordmark())

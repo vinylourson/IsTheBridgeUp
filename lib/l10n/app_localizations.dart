@@ -475,6 +475,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bridge closes {day} at {time}'**
   String notificationTitleOn(String day, String time);
+
+  /// No description provided for @alertsReopening.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell me when it reopens'**
+  String get alertsReopening;
+
+  /// No description provided for @alertsReopeningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A second notification the moment the bridge is back open, so you know when to set off.'**
+  String get alertsReopeningHint;
+
+  /// No description provided for @notificationReopenedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bridge reopened'**
+  String get notificationReopenedTitle;
+
+  /// No description provided for @notificationReopenedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can cross again.'**
+  String get notificationReopenedBody;
+
+  /// No description provided for @alertsRowReopens.
+  ///
+  /// In en, this message translates to:
+  /// **'REOPENS'**
+  String get alertsRowReopens;
 }
 
 class _AppLocalizationsDelegate

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app's own palette, so the widget does not look like a different app
+     sitting next to it. Fixed dark rather than theme-following: the scene and
+     every screen in the app are dark, and a light widget would be the odd one
+     out on the home screen. -->
+<resources>
+    <color name="widget_bg">#12121A</color>
+    <color name="widget_border">#2A2A38</color>
+    <color name="widget_accent">#9AD284</color>
+    <color name="widget_ink">#F2ECE6</color>
+    <color name="widget_ink_dim">#8A8A98</color>
+    <color name="widget_ink_faint">#5A5A68</color>
+</resources>

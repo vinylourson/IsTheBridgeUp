@@ -262,6 +262,33 @@ but `zonedSchedule` throws there, because a browser cannot run code once its
 tab is closed. `NotificationService.canSchedule` reflects that, and the screen
 explains it rather than showing a dead switch.
 
+## Home-screen widget (Android)
+
+A resizable widget listing the next closures. Two things worth knowing about
+how it is built.
+
+**All the text comes from Dart, already formatted and already translated.** The
+Kotlin side does no date formatting at all — doing it there would mean a second
+implementation of the app's relative-day rules and l10n in a language where
+none of it is tested, free to drift from the one that is. Flutter writes
+finished strings; `BridgeWidgetProvider` places them into `TextViews` and
+decides only how many rows fit.
+
+**Ten rows are declared up front and hidden individually.** `RemoteViews`
+cannot inflate views in a loop, so a fixed set toggled with visibility is the
+simple way to get a variable-length list without a `RemoteViewsService`.
+
+Size is Android's own resize handles; a configuration activity sets how many
+closures to list (1, 3, 5 or 10). The provider clamps the list to whatever the
+chosen height can actually show, so shrinking the widget hides rows rather than
+clipping them — clipped rows read as missing data, not as a too-small widget.
+
+`updatePeriodMillis` is the platform minimum of 30 minutes and only re-renders;
+it does not fetch. The schedule is published days ahead and the app pushes
+fresh data whenever it refreshes, so the widget is current as of the last time
+the app ran. Because it holds finished strings, a language change only reaches
+it on the next push.
+
 ## Roadmap
 
 - **Android and iOS.** The code is platform-agnostic; enable the targets

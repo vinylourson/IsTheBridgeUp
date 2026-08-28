@@ -226,4 +226,77 @@ void main() {
       );
     });
   });
+
+  group('reopening', () {
+    test('off by default', () {
+      final List<Reminder> plan = planner.plan(
+        closures: feed(),
+        now: at(22, 8),
+        leadTimes: <Duration>{const Duration(hours: 1)},
+      );
+      expect(
+        plan.every((Reminder r) => r.kind == ReminderKind.closing),
+        isTrue,
+      );
+    });
+
+    test('adds one reminder at the moment each closure ends', () {
+      final List<Reminder> plan = planner.plan(
+        closures: feed(),
+        now: at(22, 8),
+        leadTimes: <Duration>{const Duration(hours: 1)},
+        notifyReopening: true,
+      );
+      final List<Reminder> reopenings = plan
+          .where((Reminder r) => r.kind == ReminderKind.reopening)
+          .toList();
+      expect(reopenings, hasLength(2));
+      for (final Reminder r in reopenings) {
+        expect(r.at, r.closure.end);
+        expect(r.leadTime, Duration.zero);
+      }
+    });
+
+    test('a closure already under way still gets its reopening', () {
+      // The case that matters most: you are stood at the barrier right now.
+      // No closing warning is due -- that ship has sailed, literally -- but
+      // when you can cross again is exactly what you want to know.
+      final List<Reminder> plan = planner.plan(
+        closures: feed(),
+        now: at(23, 14, 30), // inside A's 14:00-15:00 window
+        leadTimes: <Duration>{const Duration(hours: 1)},
+        notifyReopening: true,
+      );
+      final Iterable<Reminder> forA =
+          plan.where((Reminder r) => r.closure.vesselLabel == 'A');
+      expect(forA, hasLength(1));
+      expect(forA.single.kind, ReminderKind.reopening);
+      expect(forA.single.at, at(23, 15));
+    });
+
+    test('a closure that has already ended gets nothing', () {
+      final List<Reminder> plan = planner.plan(
+        closures: feed(),
+        now: at(23, 16),
+        leadTimes: <Duration>{const Duration(hours: 1)},
+        notifyReopening: true,
+      );
+      expect(
+        plan.any((Reminder r) => r.closure.vesselLabel == 'A'),
+        isFalse,
+      );
+    });
+
+    test('reopening and closing stay interleaved by time', () {
+      final List<Reminder> plan = planner.plan(
+        closures: feed(),
+        now: at(22, 8),
+        leadTimes: <Duration>{const Duration(hours: 1)},
+        notifyReopening: true,
+      );
+      for (int i = 1; i < plan.length; i++) {
+        expect(plan[i].at.isBefore(plan[i - 1].at), isFalse);
+      }
+    });
+  });
 }

@@ -62,5 +62,10 @@
   "notificationBodyMaintenance": "Maintenance · fermé jusqu'à {end}. Prenez un autre itinéraire.",
   "alertsLeadTimeHint": "Choisissez-en autant que vous voulez — une fermeture peut vous prévenir un jour avant, puis une heure avant. Au moins une reste sélectionnée.",
   "alertsCapped": "Seuls les {count} rappels les plus proches tiennent ; votre appareil limite le nombre de rappels en attente.",
-  "notificationTitleOn": "Fermeture du pont {day} à {time}"
+  "notificationTitleOn": "Fermeture du pont {day} à {time}",
+  "alertsReopening": "Me prévenir à la réouverture",
+  "alertsReopeningHint": "Une seconde notification au moment où le pont rouvre, pour savoir quand partir.",
+  "notificationReopenedTitle": "Pont rouvert",
+  "notificationReopenedBody": "Vous pouvez de nouveau traverser.",
+  "alertsRowReopens": "ROUVRE"
 }

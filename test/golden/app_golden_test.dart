@@ -222,6 +222,8 @@ void main() {
     // more than one selected.
     await tester.tap(find.text('1d'));
     await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Tell me when it reopens'));
+    await tester.pump(const Duration(seconds: 1));
     await expectLater(
       find.byType(IsTheBridgeUpApp),
       matchesGoldenFile('goldens/alerts_on_en.png'),

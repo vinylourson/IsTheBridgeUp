@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ten rows are declared up front and hidden individually: RemoteViews
+     cannot inflate views in a loop, so a fixed set toggled with visibility is
+     the simple way to do a variable-length list without a RemoteViewsService. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/widget_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_accent"
+        android:textSize="15sp"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/widget_updated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="6dp"
+        android:textColor="@color/widget_ink_faint"
+        android:textSize="10sp"
+        android:fontFamily="monospace"
+        android:maxLines="1" />
+
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_ink_dim"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/row_0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_0_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_0_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/row_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_1_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_1_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/row_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_2_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_2_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/row_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_3_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_3_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/row_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_4_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_4_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/row_5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_5_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_5_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/row_6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_6_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_6_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/row_7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_7_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_7_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/row_8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_8_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_8_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/row_9"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/row_9_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/row_9_what"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:textColor="@color/widget_ink_dim"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+</LinearLayout>

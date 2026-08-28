@@ -183,5 +183,10 @@
         "type": "String"
       }
     }
-  }
+  },
+  "alertsReopening": "Tell me when it reopens",
+  "alertsReopeningHint": "A second notification the moment the bridge is back open, so you know when to set off.",
+  "notificationReopenedTitle": "Bridge reopened",
+  "notificationReopenedBody": "You can cross again.",
+  "alertsRowReopens": "REOPENS"
 }

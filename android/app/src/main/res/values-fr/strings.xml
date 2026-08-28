@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Pont levé ?</string>
+    <string name="widget_app_name">Pont levé ?</string>
+    <string name="widget_config_title">Prochaines fermetures</string>
+    <string name="widget_config_hint">Combien en afficher. Redimensionnez ensuite le widget ; il en montrera moins si la place manque.</string>
+    <string name="widget_config_1">Seulement la prochaine</string>
+    <string name="widget_config_3">3 fermetures</string>
+    <string name="widget_config_5">5 fermetures</string>
+    <string name="widget_config_10">10 fermetures</string>
 </resources>
