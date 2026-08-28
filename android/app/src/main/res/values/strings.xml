@@ -3,4 +3,11 @@
     <!-- Shown under the launcher icon, so it has to stay short: Android
          truncates long labels. The full name lives in the store listing. -->
     <string name="app_name">Bridge Up?</string>
+    <string name="widget_app_name">Bridge Up?</string>
+    <string name="widget_config_title">Next closures</string>
+    <string name="widget_config_hint">How many to list. Resize the widget afterwards; it shows fewer if the space is tighter.</string>
+    <string name="widget_config_1">Just the next one</string>
+    <string name="widget_config_3">3 closures</string>
+    <string name="widget_config_5">5 closures</string>
+    <string name="widget_config_10">10 closures</string>
 </resources>

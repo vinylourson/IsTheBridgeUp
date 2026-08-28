@@ -1,3 +1,9 @@
+import 'ui/home_widget_snapshot.dart';
+import 'data/services/home_widget_service.dart';
+import 'data/repositories/closure_repository.dart';
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -45,6 +51,53 @@ class _Shell extends StatefulWidget {
 }
 
 class _ShellState extends State<_Shell> {
+  static const HomeWidgetService _homeWidget = HomeWidgetService();
+
+  /// Held rather than looked up again in dispose(): by then the element is
+  /// deactivated and an ancestor lookup throws.
+  ClosureRepository? _repository;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_homeWidget.isSupported) return;
+    if (_repository == null) {
+      _repository = context.read<ClosureRepository>();
+      _repository!.addListener(_pushToHomeWidget);
+    }
+    // Also on locale change: the widget holds finished strings, so it would
+    // otherwise keep yesterday's language until the next refresh.
+    _pushToHomeWidget();
+  }
+
+  @override
+  void dispose() {
+    _repository?.removeListener(_pushToHomeWidget);
+    super.dispose();
+  }
+
+  /// Hands the home-screen widget a set of finished, translated strings.
+  void _pushToHomeWidget() {
+    if (!mounted) return;
+    final StatusViewModel status = context.read<StatusViewModel>();
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String locale = Localizations.localeOf(context).toLanguageTag();
+    final DateTime? fetchedAt = status.fetchedAt;
+
+    unawaited(
+      _homeWidget.push(
+        buildWidgetSnapshot(
+          l10n: l10n,
+          locale: locale,
+          status: status.status,
+          upcoming: status.upcoming,
+          now: status.now,
+          fetchedAt: fetchedAt,
+        ),
+      ),
+    );
+  }
+
   int _index = 0;
 
   @override
@@ -114,9 +167,9 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final String locale = Localizations.localeOf(context).toLanguageTag();
-    final tz.TZDateTime now =
-        context.select<StatusViewModel, DateTime>((StatusViewModel vm) => vm.now)
-            as tz.TZDateTime;
+    final tz.TZDateTime now = context.select<StatusViewModel, DateTime>(
+      (StatusViewModel vm) => vm.now,
+    ) as tz.TZDateTime;
 
     return Container(
       width: double.infinity,

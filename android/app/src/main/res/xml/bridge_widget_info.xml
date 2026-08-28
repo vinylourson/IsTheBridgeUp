@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Size is the user's, via Android's resize handles. minResizeHeight allows
+     a two-row widget; the provider clamps the list to what the chosen height
+     can show, so shrinking it hides rows rather than clipping them.
+
+     updatePeriodMillis is the platform minimum of 30 minutes and only re-runs
+     the render. It does not fetch: the schedule is published days ahead, and
+     the app writes fresh data whenever it refreshes. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="70dp"
+    android:maxResizeWidth="400dp"
+    android:maxResizeHeight="400dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:configure="fr.vinylourson.is_the_bridge_up.BridgeWidgetConfigureActivity"
+    android:initialLayout="@layout/widget_bridge"
+    android:previewLayout="@layout/widget_bridge"
+    android:updatePeriodMillis="1800000" />
