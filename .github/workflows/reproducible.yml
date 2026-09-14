@@ -22,9 +22,14 @@ jobs:
     name: Rebuild and compare
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 is load-bearing, not caution. Flutter derives its own
+      # version from `git describe`, so a shallow submodule checkout has no
+      # tags and the SDK reports 0.0.0-unknown -- which then fails every
+      # pubspec SDK constraint with an error that never mentions tags.
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.tag }}
+          fetch-depth: 0
           submodules: true
 
       - uses: actions/setup-java@v4
@@ -39,6 +44,17 @@ jobs:
         run: |
           echo "$GITHUB_WORKSPACE/.flutter/bin" >> "$GITHUB_PATH"
           echo "PUB_CACHE=$GITHUB_WORKSPACE/.pub-cache" >> "$GITHUB_ENV"
+
+      - name: The vendored SDK must match FLUTTER_VERSION
+        run: |
+          VENDORED=$(git -C .flutter describe --tags)
+          REPORTED=$(flutter --version | head -1)
+          echo "submodule: $VENDORED"
+          echo "reports:   $REPORTED"
+          if [ "$VENDORED" != "$FLUTTER_VERSION" ]; then
+            echo "::error::.flutter is $VENDORED but FLUTTER_VERSION is $FLUTTER_VERSION"
+            exit 1
+          fi
 
       - run: flutter config --no-analytics && flutter config --android-sdk "$ANDROID_HOME"
       - run: flutter pub get
