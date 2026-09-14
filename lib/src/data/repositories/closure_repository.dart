@@ -66,7 +66,9 @@ class ClosureRepository extends ChangeNotifier {
     try {
       // Deliberately yesterday, not today — see ChabanApiService.fetchRecords.
       final DateTime from = _clock.now().subtract(const Duration(days: 1));
-      final List<Map<String, dynamic>> records = await _api.fetchRecords(from: from);
+      final List<Map<String, dynamic>> records = await _api.fetchRecords(
+        from: from,
+      );
       final DateTime now = _clock.now();
 
       _closures = _clock.parseRecords(records);

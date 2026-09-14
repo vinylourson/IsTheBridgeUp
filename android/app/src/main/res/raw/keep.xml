@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The release build minifies (Flutter sets isMinifyEnabled for release) and
+     the resource shrinker removes anything it cannot see referenced from
+     Android resources or code. ic_stat_bridge is only ever named by a string
+     handed to flutter_local_notifications from Dart, so the shrinker reported
+     it unreachable and stripped it, leaving the release build throwing
+     PlatformException(invalid_icon) and posting no notifications at all.
+     Debug builds do not shrink, so they never showed the problem. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_bridge" />

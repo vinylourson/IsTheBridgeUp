@@ -261,4 +261,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alertsRowReopens => 'REOPENS';
+
+  @override
+  String get infoVersion => 'Version';
 }

@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Flutter only declares INTERNET in the debug and profile manifests, so
+         without this line the release build cannot reach the network at all:
+         every refresh fails and the app can only ever show its cache. Debug
+         builds hide the bug completely. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Required to show notifications at all on Android 13+. Requested at
          runtime from the Alerts screen. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
