@@ -1,0 +1,6 @@
+Aucun changement dans l'application elle-même.
+
+Le SDK Flutter est désormais figé dans le dépôt et les versions sont compilées
+avec lui : une reconstruction indépendante de cette étiquette produit les mêmes
+octets. C'est ce qui permet à F-Droid de publier cet APK signé tel quel plutôt
+que de le resigner.

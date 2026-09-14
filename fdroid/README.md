@@ -4,43 +4,55 @@
 [fdroiddata](https://gitlab.com/fdroid/fdroiddata) as
 `metadata/fr.vinylourson.is_the_bridge_up.yml`, via a merge request.
 
-It is untested — the recipe can only really be exercised on F-Droid's own
-buildserver — and two prerequisites are not met yet.
+The recipe itself is unverified — it can only really be exercised on F-Droid's
+buildserver — but the premise underneath it has been measured.
 
-## Prerequisite 1 — vendor the Flutter SDK as a submodule
+## Why `binary:` is worth the trouble
 
-The recipe calls `.flutter/bin/flutter`, which does not exist in this
-repository. F-Droid builds with a fully free toolchain on its own
-infrastructure and will not install Flutter for us, so the SDK has to be pinned
-as a git submodule at `.flutter`, at the exact revision our releases are built
-with. This is what Obtainium does, and it is the only arrangement currently
-known to work.
+It asks F-Droid to rebuild the tag and compare byte for byte with our published
+APK. On a match they publish **our** signed binary instead of re-signing with
+F-Droid's key, so there is one signing identity everywhere and a user can move
+between F-Droid and a direct download without uninstalling. Without it, those
+are two mutually exclusive apps.
 
-Consequences worth weighing before doing it:
+## The Flutter reproducibility problem, measured
 
-- clones get much heavier, and CI has to check out submodules
-- the pinned SDK revision becomes something to maintain deliberately
-- our own release workflow should build with the same pinned SDK, or the
-  "reproducible" claim is only accidentally true
+Three builds of the same commit with the same vendored SDK:
 
-## Prerequisite 2 — prove reproducibility locally first
+| build | where | `libapp.so` sha256 |
+|---|---|---|
+| 1 | repo path | `1eef638c…` |
+| 2 | repo path, clean rebuild | `1eef638c…` |
+| 3 | a different directory | `089138 91…` |
 
-`binary:` asks F-Droid to rebuild the tag and compare byte for byte with our
-published APK. If it does not match, the app is still publishable but F-Droid
-signs it with **their** key — which means an F-Droid install and a direct
-download become two mutually exclusive apps.
+So the build **is** deterministic, and it **is** path-dependent —
+`strings libapp.so` shows the absolute build path embedded in it. That is the
+whole problem, and matching the path is the whole fix.
 
-The known Flutter obstacle is absolute build paths baked into `libapp.so`. The
-recipe reproduces the GitHub Actions path (`/home/runner/work/IsTheBridgeUp/
-IsTheBridgeUp`) for exactly that reason. Verify before submitting:
+Our releases are built by GitHub Actions at
+`/home/runner/work/IsTheBridgeUp/IsTheBridgeUp`, with the SDK pinned at
+`.flutter`. The recipe moves F-Droid's checkout to that same path and uses that
+same SDK. Both halves have to hold: a different SDK revision changes the bytes
+just as surely as a different path.
+
+To check a rebuild before asking F-Droid to:
 
 ```bash
-# unzip both APKs and compare the native library
-unzip -p ours.apk lib/arm64-v8a/libapp.so | sha256sum
+unzip -p ours.apk    lib/arm64-v8a/libapp.so | sha256sum
 unzip -p rebuilt.apk lib/arm64-v8a/libapp.so | sha256sum
 ```
 
 If they differ, `strings libapp.so | grep -F /home/` usually shows why.
+
+## The SDK is vendored
+
+`.flutter` is a git submodule pinned to the exact Flutter revision releases are
+built with (currently `3.47.1`). The release workflow builds with it rather
+than with `flutter-action`, and fails if the two disagree.
+
+Clones that init submodules pay about 184 MB for it. Upgrading Flutter is now a
+deliberate act: bump `FLUTTER_VERSION`, move the submodule, and expect the
+rebuilt bytes to change.
 
 ## Submitting
 

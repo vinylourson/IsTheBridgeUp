@@ -11,6 +11,11 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
+    # The vendored Flutter SDK and the local pub cache are dependencies, not
+    # our code. Analysis does not reach them today, but excluding them keeps
+    # that true rather than incidental.
+    - .flutter/**
+    - .pub-cache/**
     - build/**
     - android/**
     - ios/**

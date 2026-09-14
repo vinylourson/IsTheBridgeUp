@@ -1,11 +1,10 @@
-# DRAFT — the file to add as metadata/fr.vinylourson.is_the_bridge_up.yml in a
-# merge request to https://gitlab.com/fdroid/fdroiddata
-#
-# UNTESTED. It can only be exercised on F-Droid's own buildserver, and it has
-# two unmet prerequisites — see fdroid/README.md. Do not submit as-is.
+# The file to add as metadata/fr.vinylourson.is_the_bridge_up.yml in a merge
+# request to https://gitlab.com/fdroid/fdroiddata
 #
 # Modelled on dev.imranr.obtainium.fdroid, the closest working Flutter recipe
-# in fdroiddata.
+# in fdroiddata. Still unverified end to end: the recipe itself can only be
+# exercised on F-Droid's buildserver. What HAS been checked locally is the
+# premise it rests on — see fdroid/README.md.
 
 Categories:
   - Navigation
@@ -39,9 +38,11 @@ Builds:
     binary: https://github.com/vinylourson/IsTheBridgeUp/releases/download/v%v/is-the-bridge-up-%v-arm64-v8a.apk
 
     prebuild:
-      # Flutter embeds absolute build paths into the compiled native library,
-      # so a build anywhere else produces different bytes. This reproduces the
-      # exact path GitHub Actions uses, which is what our release is built at.
+      # Flutter embeds absolute build paths into libapp.so, so a build
+      # anywhere else produces different bytes. Measured, not assumed: two
+      # clean builds at the same path gave an identical libapp.so, and the
+      # same source built from another directory did not. This reproduces the
+      # path GitHub Actions uses, which is where our release is built.
       - export repo=/home/runner/work/IsTheBridgeUp
       - mkdir -p $repo
       - cd ..
@@ -76,5 +77,5 @@ AllowedAPKSigningKeys: f6428f82d1c634a8dd154ebb22a141ff716e93bd0442b35f0900f4334
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.1.1
-CurrentVersionCode: 2003
+CurrentVersion: 1.1.2
+CurrentVersionCode: 2004
