@@ -52,7 +52,7 @@ jobs:
           echo "version=$PUBSPEC" >> "$GITHUB_ENV"
 
       - run: flutter analyze
-      - run: flutter test --exclude-tags "live,store"
+      - run: flutter test --exclude-tags "live,golden"
 
       - name: Restore the signing keystore
         env:

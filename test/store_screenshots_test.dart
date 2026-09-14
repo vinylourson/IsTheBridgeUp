@@ -1,4 +1,8 @@
-@Tags(<String>['store'])
+// Tagged `golden` as well as `store`: these are rendered goldens, and
+// rendered goldens do not match across platforms, so CI must skip them the
+// same way it skips the app goldens. `store` stays so the set can still be
+// regenerated on its own.
+@Tags(<String>['golden', 'store'])
 library;
 
 import 'dart:convert';
