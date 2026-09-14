@@ -1,0 +1,36 @@
+Le pont Chaban-Delmas à Bordeaux se lève pour laisser passer les navires, et
+la circulation est alors coupée pendant une à deux heures. Cette application
+vous dit si vous pouvez traverser maintenant, et quand aura lieu la prochaine
+fermeture.
+
+Elle lit le calendrier des fermetures publié en open data par Bordeaux
+Métropole, et l'affiche comme une réponse plutôt que comme un tableau : ouvert
+ou fermé, dans combien de temps cela change, et quel navire en est la cause.
+
+FONCTIONNALITÉS
+
+* La réponse d'abord : PONT OUVERT ou PONT FERMÉ, avec un compte à rebours
+* Le calendrier complet des prochaines fermetures, avec les navires attendus
+* Des rappels avant une fermeture, à autant d'échéances que vous voulez,
+  jusqu'à un jour à l'avance
+* Un rappel facultatif au moment de la réouverture
+* Un widget redimensionnable listant les prochaines fermetures
+* Fonctionne hors ligne : le dernier calendrier est conservé et affiché
+  immédiatement, avec l'heure de sa récupération
+* Français et anglais
+
+DES PRÉVISIONS, PAS UN CAPTEUR
+
+Il n'existe pas de flux en temps réel pour ce pont. Le calendrier publié est
+une prévision, liée à des mouvements de navires qui peuvent changer :
+considérez-le comme une bonne indication, pas comme une garantie.
+L'application indique toujours la date de récupération des données.
+
+VIE PRIVÉE
+
+Aucun compte, aucune analyse d'audience, aucun traceur, aucune publicité.
+L'application n'effectue qu'un seul type de requête réseau : la récupération du
+calendrier public des fermetures auprès de la plateforme open data de Bordeaux
+Métropole. Rien n'est envoyé ailleurs.
+
+Source des données : open data Bordeaux Métropole, sous Licence Ouverte.
