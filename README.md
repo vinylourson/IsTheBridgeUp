@@ -321,6 +321,38 @@ pass.
 Release steps: bump `version:`, run the tests, build with the SHA, tag
 `v<semver>`.
 
+### Release signing
+
+`android/app/build.gradle.kts` reads `android/key.properties` when it exists and
+signs the release build with that keystore; when it does not, it falls back to
+debug signing so a fresh clone and CI still build. Check which key a build
+actually used — never assume:
+
+```bash
+apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk
+```
+
+`CN=Android Debug` means it fell back. Anything distributed must name your own
+certificate.
+
+Create the keystore yourself, so its password never passes through a terminal
+transcript or shell history:
+
+```bash
+keytool -genkey -v -keystore ~/keys/is-the-bridge-up.jks \
+  -keyalg RSA -keysize 4096 -validity 10000 -alias upload
+```
+
+Then copy `android/key.properties.example` to `android/key.properties` and fill
+it in. Both the keystore and that file are gitignored, and a test fails if
+either is ever committed.
+
+**Back the keystore up somewhere durable.** Losing it means the app can never
+be updated under the same identity on any store, and every user has to
+uninstall and reinstall. Moving from debug signing to a real key has the same
+consequence once: the signatures do not match, so the existing install must go
+first.
+
 ### Two release-only traps
 
 Both of these shipped, and neither was visible in a debug build or in any test

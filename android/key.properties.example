@@ -1,0 +1,19 @@
+# Copy to android/key.properties and fill in. That file is gitignored and must
+# never be committed: with it and the keystore, anyone can publish an update
+# that Android accepts as genuine.
+#
+# storeFile is resolved relative to android/app/, so an absolute path is safest.
+# Keep the keystore OUTSIDE the repository.
+#
+# Create the keystore with:
+#   keytool -genkey -v -keystore ~/keys/is-the-bridge-up.jks \
+#     -keyalg RSA -keysize 4096 -validity 10000 -alias upload
+#
+# Back it up somewhere durable. Losing it means the app can never be updated
+# under the same identity again -- on any store -- and users must uninstall
+# and reinstall to move to a new key.
+
+storeFile=/Users/you/keys/is-the-bridge-up.jks
+storePassword=
+keyAlias=upload
+keyPassword=
