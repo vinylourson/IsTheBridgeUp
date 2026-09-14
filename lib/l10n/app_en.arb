@@ -188,5 +188,6 @@
   "alertsReopeningHint": "A second notification the moment the bridge is back open, so you know when to set off.",
   "notificationReopenedTitle": "Bridge reopened",
   "notificationReopenedBody": "You can cross again.",
-  "alertsRowReopens": "REOPENS"
+  "alertsRowReopens": "REOPENS",
+  "infoVersion": "Version"
 }

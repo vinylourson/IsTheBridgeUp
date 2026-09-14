@@ -289,6 +289,55 @@ fresh data whenever it refreshes, so the widget is current as of the last time
 the app ran. Because it holds finished strings, a language change only reaches
 it on the next push.
 
+## Versioning and releases
+
+`pubspec.yaml` holds the only version number:
+
+```yaml
+version: 1.1.0+2      # <semver>+<build>
+```
+
+Android reads it as `versionName`/`versionCode`, iOS as
+`CFBundleShortVersionString`/`CFBundleVersion`, and the Info screen shows it
+back — so a build sitting on a device can be identified rather than guessed at.
+
+**Bump the build number on every release, including a rebuild of the same
+semver.** Android refuses to install an APK whose `versionCode` is not greater
+than the one already installed, and a build number stuck at `1` is precisely
+why "is this the new build?" was unanswerable for several rounds.
+
+To tie a build to a commit, pass the SHA in:
+
+```bash
+flutter build apk --release --dart-define=GIT_SHA=$(git rev-parse --short HEAD)
+```
+
+The Info screen then reads `v1.1.0 (2) · a1b2c3d`. Without the flag the commit
+is simply absent, which is the honest answer — nothing ties such a build to a
+commit. It is deliberately *not* baked into a committed file: that file would
+be stale the moment the next commit landed, and no staleness check could ever
+pass.
+
+Release steps: bump `version:`, run the tests, build with the SHA, tag
+`v<semver>`.
+
+### Two release-only traps
+
+Both of these shipped, and neither was visible in a debug build or in any test
+until `test/release_config_test.dart` was added to catch them:
+
+- **`INTERNET` is only declared in Flutter's debug and profile manifests.**
+  Without adding it to the main manifest, release builds cannot reach the
+  network at all: every refresh fails and the app shows its cache forever,
+  while debug builds work perfectly.
+- **Release builds minify, and the resource shrinker strips anything it cannot
+  see referenced.** `ic_stat_bridge` is only ever named by a string passed from
+  Dart, so it was removed and the notification plugin threw
+  `PlatformException(invalid_icon)` on startup. `res/raw/keep.xml` pins it.
+
+The lesson generalises: **verify release builds, not debug ones.** An APK check
+that passes on `--debug` proves very little.
+
 ## Roadmap
 
 - **Android and iOS.** The code is platform-agnostic; enable the targets

@@ -2,7 +2,18 @@ name: is_the_bridge_up
 description: "Know when the Chaban-Delmas bridge in Bordeaux is lifted, before you get stuck on the wrong bank."
 publish_to: 'none'
 
-version: 1.0.0+1
+# Single source of truth for the app's version, on every platform: Android
+# reads it as versionName/versionCode via flutter.versionName/versionCode, iOS
+# as CFBundleShortVersionString/CFBundleVersion, and the Info screen shows it
+# back so a build on a device can be identified without guessing.
+#
+#   <semver>+<build>
+#
+# Bump the build number on EVERY release, including rebuilds of the same
+# semver: Android refuses to install an APK whose versionCode is not greater
+# than the installed one, and a stuck build number is why "is this the new
+# build?" was unanswerable.
+version: 1.1.0+2
 
 environment:
   sdk: ^3.13.1
@@ -32,6 +43,7 @@ dependencies:
   cupertino_icons: ^1.0.9
   flutter_local_notifications: ^22.3.0
   home_widget: ^0.9.3
+  package_info_plus: ^10.2.1
 
   # NOTE: flutter_local_notifications is deliberately NOT a dependency yet.
   # It has no web implementation and pulls in dart:io, which breaks

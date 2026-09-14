@@ -505,6 +505,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'REOPENS'**
   String get alertsRowReopens;
+
+  /// No description provided for @infoVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get infoVersion;
 }
 
 class _AppLocalizationsDelegate

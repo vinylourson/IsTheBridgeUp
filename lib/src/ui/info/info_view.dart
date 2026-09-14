@@ -1,3 +1,5 @@
+import '../../core/app_version.dart';
+
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -9,8 +11,23 @@ import '../widgets/pixel_button.dart';
 import '../widgets/pixel_panel.dart';
 
 /// What the app is, what the data is, and what it is not.
-class InfoView extends StatelessWidget {
+class InfoView extends StatefulWidget {
   const InfoView({super.key});
+
+  @override
+  State<InfoView> createState() => _InfoViewState();
+}
+
+class _InfoViewState extends State<InfoView> {
+  AppVersion? _version;
+
+  @override
+  void initState() {
+    super.initState();
+    AppVersion.load().then((AppVersion? v) {
+      if (mounted) setState(() => _version = v);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,9 +75,7 @@ class InfoView extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 '${l10n.infoLicence}: ${ApiConfig.licence}',
-                style: PixelText.bodySmall.copyWith(
-                  color: PixelPalette.inkDim,
-                ),
+                style: PixelText.bodySmall.copyWith(color: PixelPalette.inkDim),
               ),
               const SizedBox(height: 14),
               PixelButton(
@@ -73,6 +88,15 @@ class InfoView extends StatelessWidget {
             ],
           ),
         ),
+        // Last, and quiet: it exists so a build on a device can be identified,
+        // not because anyone came here to read it.
+        if (_version != null) ...<Widget>[
+          const SizedBox(height: 12),
+          Text(
+            '${l10n.infoVersion} ${_version!.label}',
+            style: PixelText.bodySmall.copyWith(color: PixelPalette.inkFaint),
+          ),
+        ],
       ],
     );
   }

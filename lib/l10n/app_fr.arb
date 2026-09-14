@@ -67,5 +67,6 @@
   "alertsReopeningHint": "Une seconde notification au moment où le pont rouvre, pour savoir quand partir.",
   "notificationReopenedTitle": "Pont rouvert",
   "notificationReopenedBody": "Vous pouvez de nouveau traverser.",
-  "alertsRowReopens": "ROUVRE"
+  "alertsRowReopens": "ROUVRE",
+  "infoVersion": "Version"
 }

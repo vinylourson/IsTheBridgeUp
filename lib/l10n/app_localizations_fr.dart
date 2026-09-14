@@ -262,4 +262,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get alertsRowReopens => 'ROUVRE';
+
+  @override
+  String get infoVersion => 'Version';
 }
