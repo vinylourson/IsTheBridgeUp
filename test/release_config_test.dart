@@ -36,8 +36,10 @@ void main() {
     // the whole release build inside R8, with an error that points at a row
     // and column and never mentions this file. `--` inside an XML comment is
     // illegal, and is exactly how this first went wrong.
-    final Iterable<RegExpMatch> comments =
-        RegExp(r'<!--(.*?)-->', dotAll: true).allMatches(xml);
+    final Iterable<RegExpMatch> comments = RegExp(
+      r'<!--(.*?)-->',
+      dotAll: true,
+    ).allMatches(xml);
     expect(comments, isNotEmpty);
     for (final RegExpMatch comment in comments) {
       expect(
@@ -57,9 +59,8 @@ void main() {
       'xxxhdpi',
     ]) {
       expect(
-        File(
-          'android/app/src/main/res/drawable-$density/ic_stat_bridge.png',
-        ).existsSync(),
+        File('android/app/src/main/res/drawable-$density/ic_stat_bridge.png')
+            .existsSync(),
         isTrue,
         reason: 'ic_stat_bridge missing for $density',
       );
@@ -68,8 +69,10 @@ void main() {
 
   test('the version carries a build number', () {
     final String pubspec = File('pubspec.yaml').readAsStringSync();
-    final RegExp pattern = RegExp(r'^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$',
-        multiLine: true);
+    final RegExp pattern = RegExp(
+      r'^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$',
+      multiLine: true,
+    );
     final RegExpMatch? match = pattern.firstMatch(pubspec);
     expect(
       match,
@@ -79,5 +82,50 @@ void main() {
     // Android refuses an install whose versionCode is not greater than the
     // installed one, so a build number stuck at 1 silently blocks upgrades.
     expect(int.parse(match!.group(2)!), greaterThan(1));
+  });
+
+  group('signing', () {
+    test('no signing secret is tracked by git', () {
+      // The keystore and its passwords are what let anyone publish an update
+      // Android accepts as genuine. Losing them is bad; committing them is
+      // worse, and a commit is not something you can take back.
+      final ProcessResult tracked = Process.runSync('git', <String>[
+        'ls-files',
+      ]);
+      final List<String> offenders = (tracked.stdout as String)
+          .split('\n')
+          .where(
+            (String f) =>
+                f.endsWith('key.properties') ||
+                f.endsWith('.jks') ||
+                f.endsWith('.keystore'),
+          )
+          .toList();
+      expect(offenders, isEmpty, reason: 'secrets must never be committed');
+    });
+
+    test('the keystore format is documented', () {
+      // Without this, the only description of key.properties lives in the
+      // Gradle file that reads it.
+      final File example = File('android/key.properties.example');
+      expect(example.existsSync(), isTrue);
+      final String text = example.readAsStringSync();
+      for (final String key in <String>[
+        'storeFile',
+        'storePassword',
+        'keyAlias',
+        'keyPassword',
+      ]) {
+        expect(text, contains(key));
+      }
+    });
+
+    test('a missing keystore falls back rather than failing the build', () {
+      // A fresh clone and CI have no keystore. Requiring one would break both.
+      final String gradle = File('android/app/build.gradle.kts')
+          .readAsStringSync();
+      expect(gradle, contains('hasReleaseKey'));
+      expect(gradle, contains('signingConfigs.getByName("debug")'));
+    });
   });
 }

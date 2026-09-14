@@ -1,0 +1,34 @@
+The Chaban-Delmas bridge in Bordeaux lifts to let ships through, and when it
+does the road is shut for an hour or two. This app tells you whether you can
+cross right now, and when the next closure is.
+
+It reads the closure schedule that Bordeaux Métropole publishes as open data,
+and shows it as a verdict rather than a table: open or closed, how long until
+that changes, and which ship is responsible.
+
+FEATURES
+
+* A plain answer first: BRIDGE OPEN or BRIDGE CLOSED, with a countdown
+* The full schedule of upcoming closures, with the vessels passing
+* Reminders before a closure, at as many lead times as you like, including a
+  day ahead
+* An optional reminder the moment the bridge reopens
+* A resizable home-screen widget listing the next closures
+* Works offline: the last schedule is cached and shown instantly, with the
+  time it was fetched
+* English and French
+
+FORECASTS, NOT A SENSOR
+
+There is no live feed for this bridge. The published schedule is a forecast,
+set by ship movements that can shift, so treat it as a strong hint rather than
+a guarantee. The app always shows when its data was last fetched so you can
+judge for yourself.
+
+PRIVACY
+
+No accounts, no analytics, no tracking, no advertising. The app makes exactly
+one kind of network request: fetching the public closure schedule from
+Bordeaux Métropole's open data platform. Nothing is sent anywhere else.
+
+Data source: Bordeaux Métropole open data, licensed under the Licence Ouverte.

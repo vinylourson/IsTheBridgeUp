@@ -318,8 +318,64 @@ commit. It is deliberately *not* baked into a committed file: that file would
 be stale the moment the next commit landed, and no staleness check could ever
 pass.
 
-Release steps: bump `version:`, run the tests, build with the SHA, tag
-`v<semver>`.
+Releasing is a tag push. `.github/workflows/release.yml` builds signed
+per-ABI APKs, refuses to continue if any of them turns out debug-signed, and
+publishes a GitHub Release with checksums and the changelog from
+`metadata/`. The job also fails if the tag and `pubspec.yaml` disagree, so a
+release can never claim a version its APKs do not carry.
+
+```bash
+# bump version: in pubspec.yaml, add metadata/*/changelogs/<versionCode>.txt
+git tag -a v1.2.0 -m "..." && git push origin v1.2.0
+```
+
+The signing key lives in four repository secrets
+(`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
+`ANDROID_KEY_PASSWORD`). Rotating the keystore means updating all four — and
+means every existing install has to be removed and reinstalled, so don't.
+
+### Store metadata
+
+`metadata/` holds fastlane-structured listings in English and French, which
+F-Droid and IzzyOnDroid both read directly from the repository. Screenshots are
+generated, not captured from a device — the closed state only exists for an
+hour or two at a time and cannot be summoned on demand:
+
+```bash
+flutter test --tags store --update-goldens
+```
+
+### Release signing
+
+`android/app/build.gradle.kts` reads `android/key.properties` when it exists and
+signs the release build with that keystore; when it does not, it falls back to
+debug signing so a fresh clone and CI still build. Check which key a build
+actually used — never assume:
+
+```bash
+apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk
+```
+
+`CN=Android Debug` means it fell back. Anything distributed must name your own
+certificate.
+
+Create the keystore yourself, so its password never passes through a terminal
+transcript or shell history:
+
+```bash
+keytool -genkey -v -keystore ~/keys/is-the-bridge-up.jks \
+  -keyalg RSA -keysize 4096 -validity 10000 -alias upload
+```
+
+Then copy `android/key.properties.example` to `android/key.properties` and fill
+it in. Both the keystore and that file are gitignored, and a test fails if
+either is ever committed.
+
+**Back the keystore up somewhere durable.** Losing it means the app can never
+be updated under the same identity on any store, and every user has to
+uninstall and reinstall. Moving from debug signing to a real key has the same
+consequence once: the signatures do not match, so the existing install must go
+first.
 
 ### Two release-only traps
 

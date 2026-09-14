@@ -1,0 +1,8 @@
+Des rappels avant une fermeture, à plusieurs échéances à la fois dont un jour
+à l'avance, et un rappel facultatif à la réouverture.
+
+Un widget redimensionnable listant les prochaines fermetures.
+
+Corrections : le calendrier ne pouvait pas se rafraîchir dans les versions
+release, et les notifications n'affichaient rien. Les deux sont corrigés, et
+l'application affiche désormais sa version dans l'onglet Infos.
