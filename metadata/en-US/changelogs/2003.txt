@@ -1,8 +1,0 @@
-Reminders before a closure, at several lead times at once including a day
-ahead, plus an optional reminder when the bridge reopens.
-
-A resizable home-screen widget listing the next closures.
-
-Fixes: the schedule could not refresh in release builds, and notifications
-were posting nothing. Both are fixed, and the app now shows its version on the
-Info screen so a build can be identified.

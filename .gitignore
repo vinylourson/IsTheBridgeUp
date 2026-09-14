@@ -55,3 +55,6 @@ app.*.map.json
 
 # Ignore flutter screen capture
 flutter_*.png
+
+# Local pub cache, used when building with the vendored SDK (see .flutter).
+/.pub-cache/

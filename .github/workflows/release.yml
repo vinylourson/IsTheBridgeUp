@@ -23,23 +23,45 @@ jobs:
     name: Build signed APKs and publish
     runs-on: ubuntu-latest
     steps:
+      # Submodules matter here: .flutter is the SDK this release is built
+      # with, pinned so F-Droid can rebuild the same bytes later.
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
           fetch-depth: 0
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
+          submodules: true
 
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      # Deliberately NOT flutter-action. Releases build with the vendored SDK
+      # at .flutter, because F-Droid rebuilds with exactly that revision --
+      # a different SDK produces different bytes and the reproducible-build
+      # match silently fails.
+      - name: Use the vendored Flutter SDK
+        run: |
+          echo "$GITHUB_WORKSPACE/.flutter/bin" >> "$GITHUB_PATH"
+          echo "PUB_CACHE=$GITHUB_WORKSPACE/.pub-cache" >> "$GITHUB_ENV"
+
+      - name: The vendored SDK must match FLUTTER_VERSION
+        run: |
+          VENDORED=$(git -C .flutter describe --tags)
+          echo "vendored: $VENDORED   expected: $FLUTTER_VERSION"
+          if [ "$VENDORED" != "$FLUTTER_VERSION" ]; then
+            echo "::error::.flutter is $VENDORED but FLUTTER_VERSION is $FLUTTER_VERSION"
+            exit 1
+          fi
+
+      - run: flutter config --no-analytics && flutter config --android-sdk "$ANDROID_HOME"
       - run: flutter pub get
+
+      # The absolute build path is baked into libapp.so, so it is part of the
+      # reproducible-build contract. Recorded here because F-Droid's recipe has
+      # to move its checkout to match it.
+      - name: Record the build path
+        run: echo "Built at $GITHUB_WORKSPACE"
 
       - name: Tag must match pubspec version
         run: |

@@ -1,0 +1,81 @@
+# The file to add as metadata/fr.vinylourson.is_the_bridge_up.yml in a merge
+# request to https://gitlab.com/fdroid/fdroiddata
+#
+# Modelled on dev.imranr.obtainium.fdroid, the closest working Flutter recipe
+# in fdroiddata. Still unverified end to end: the recipe itself can only be
+# exercised on F-Droid's buildserver. What HAS been checked locally is the
+# premise it rests on — see fdroid/README.md.
+
+Categories:
+  - Navigation
+  - Time
+License: GPL-3.0-only
+AuthorName: vinylourson
+SourceCode: https://github.com/vinylourson/IsTheBridgeUp
+IssueTracker: https://github.com/vinylourson/IsTheBridgeUp/issues
+Changelog: https://github.com/vinylourson/IsTheBridgeUp/releases
+
+AutoName: Is The Bridge Up?
+
+RepoType: git
+Repo: https://github.com/vinylourson/IsTheBridgeUp.git
+
+Builds:
+  - versionName: 1.1.1
+    versionCode: 2003
+    commit: v1.1.1
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+    output: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+
+    # Reproducible-build path: F-Droid rebuilds this commit, compares the
+    # result byte for byte with the APK published below, and on a match
+    # publishes OUR signed binary rather than re-signing with F-Droid's key.
+    # That keeps one signing identity everywhere, so a user can move between
+    # F-Droid and a direct download without uninstalling.
+    binary: https://github.com/vinylourson/IsTheBridgeUp/releases/download/v%v/is-the-bridge-up-%v-arm64-v8a.apk
+
+    prebuild:
+      # Flutter embeds absolute build paths into libapp.so, so a build
+      # anywhere else produces different bytes. Measured, not assumed: two
+      # clean builds at the same path gave an identical libapp.so, and the
+      # same source built from another directory did not. This reproduces the
+      # path GitHub Actions uses, which is where our release is built.
+      - export repo=/home/runner/work/IsTheBridgeUp
+      - mkdir -p $repo
+      - cd ..
+      - mv fr.vinylourson.is_the_bridge_up $repo/IsTheBridgeUp
+      - pushd $repo/IsTheBridgeUp
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter config --no-analytics
+      - .flutter/bin/flutter config --android-sdk $ANDROID_HOME
+      - .flutter/bin/flutter pub get
+      - popd
+      - mv $repo/IsTheBridgeUp fr.vinylourson.is_the_bridge_up
+
+    build:
+      - export repo=/home/runner/work/IsTheBridgeUp
+      - cd ..
+      - mv fr.vinylourson.is_the_bridge_up $repo/IsTheBridgeUp
+      - pushd $repo/IsTheBridgeUp
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - .flutter/bin/flutter build apk --release --split-per-abi --target-platform=android-arm64
+      - popd
+      - mv $repo/IsTheBridgeUp fr.vinylourson.is_the_bridge_up
+
+    scanignore:
+      - .flutter/bin/cache
+    scandelete:
+      - .flutter
+      - .pub-cache
+
+# The certificate our release keystore signs with. F-Droid refuses any binary
+# not signed by it, so a compromised release cannot be laundered through here.
+AllowedAPKSigningKeys: f6428f82d1c634a8dd154ebb22a141ff716e93bd0442b35f0900f433497384a5
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.1.2
+CurrentVersionCode: 2004

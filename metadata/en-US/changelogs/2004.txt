@@ -1,0 +1,5 @@
+No changes to the app itself.
+
+The Flutter SDK is now pinned inside the repository and releases are built with
+it, so an independent rebuild of this tag produces the same bytes. That is what
+lets F-Droid publish this exact signed APK rather than re-signing it.
