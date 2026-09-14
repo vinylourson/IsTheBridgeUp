@@ -1,0 +1,86 @@
+name: Reproducibility
+
+# Rebuilds a published tag from source and compares the result with the APK
+# attached to its release, ignoring signatures.
+#
+# This is the same check F-Droid runs before deciding whether to publish our
+# signed binary or re-sign with their own key. Running it ourselves means a
+# mismatch is found here rather than in a merge request review.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Published tag to verify (e.g. v1.1.2)'
+        required: true
+
+env:
+  FLUTTER_VERSION: 3.47.1
+
+jobs:
+  verify:
+    name: Rebuild and compare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag }}
+          submodules: true
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Must match the release job exactly: a different SDK or a different
+      # path changes the bytes, and either would make this comparison
+      # meaningless rather than merely failing.
+      - name: Use the vendored Flutter SDK
+        run: |
+          echo "$GITHUB_WORKSPACE/.flutter/bin" >> "$GITHUB_PATH"
+          echo "PUB_CACHE=$GITHUB_WORKSPACE/.pub-cache" >> "$GITHUB_ENV"
+
+      - run: flutter config --no-analytics && flutter config --android-sdk "$ANDROID_HOME"
+      - run: flutter pub get
+
+      - name: Rebuild
+        run: flutter build apk --release --split-per-abi --target-platform=android-arm64
+
+      - name: Fetch the published APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER="${{ github.event.inputs.tag }}"; VER="${VER#v}"
+          gh release download "${{ github.event.inputs.tag }}" \
+            --pattern "*${VER}-arm64-v8a.apk" --dir published --clobber
+
+      - name: Compare, ignoring signatures
+        run: |
+          REBUILT=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          PUBLISHED=$(ls published/*.apk)
+
+          # libapp.so is where Flutter's non-determinism has always shown up,
+          # so it is reported on its own before the full comparison.
+          A=$(unzip -p "$REBUILT"   lib/arm64-v8a/libapp.so | sha256sum | cut -d' ' -f1)
+          B=$(unzip -p "$PUBLISHED" lib/arm64-v8a/libapp.so | sha256sum | cut -d' ' -f1)
+          echo "rebuilt   libapp.so $A"
+          echo "published libapp.so $B"
+          if [ "$A" != "$B" ]; then
+            echo "::error::libapp.so differs — the rebuild is not reproducible"
+            echo "Embedded paths in the rebuild:"
+            unzip -p "$REBUILT" lib/arm64-v8a/libapp.so | strings | grep -oE '/home/[^ ]{0,60}' | sort -u | head
+            exit 1
+          fi
+
+          # Everything else, excluding the signature block, which is expected
+          # to differ: the rebuild here is unsigned.
+          mkdir -p a b
+          unzip -q "$REBUILT" -d a -x 'META-INF/*'
+          unzip -q "$PUBLISHED" -d b -x 'META-INF/*'
+          if diff -r a b > /tmp/diff.txt 2>&1; then
+            echo "Reproducible: every non-signature entry matches."
+          else
+            echo "::error::contents differ outside META-INF"
+            head -40 /tmp/diff.txt
+            exit 1
+          fi
