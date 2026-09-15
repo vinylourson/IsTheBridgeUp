@@ -95,10 +95,14 @@ jobs:
           keyPassword=$KEY_PASSWORD
           PROPS
 
+      # This exact command is mirrored in reproducible.yml and in the F-Droid
+      # recipe. GIT_SHA is compiled into libapp.so, so any divergence -- even
+      # the abbreviation length -- makes the binaries differ. --short alone
+      # scales with repository size and is not stable across clones.
       - name: Build signed APKs
         run: |
           flutter build apk --release --split-per-abi \
-            --dart-define=GIT_SHA=$(git rev-parse --short HEAD)
+            --dart-define=GIT_SHA=$(git rev-parse --short=10 HEAD)
 
       # A debug-signed APK installs fine and is then impossible to upgrade with
       # a real one, so this is checked rather than assumed.
