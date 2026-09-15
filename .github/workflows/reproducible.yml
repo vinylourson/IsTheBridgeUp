@@ -59,8 +59,13 @@ jobs:
       - run: flutter config --no-analytics && flutter config --android-sdk "$ANDROID_HOME"
       - run: flutter pub get
 
+      # Byte-for-byte the same command as the release job. It was the
+      # difference between them -- a missing --dart-define -- that made the
+      # first run of this check fail.
       - name: Rebuild
-        run: flutter build apk --release --split-per-abi --target-platform=android-arm64
+        run: |
+          flutter build apk --release --split-per-abi \
+            --dart-define=GIT_SHA=$(git rev-parse --short=10 HEAD)
 
       - name: Fetch the published APK
         env:
