@@ -128,4 +128,68 @@ void main() {
       expect(gradle, contains('signingConfigs.getByName("debug")'));
     });
   });
+
+  group('F-Droid recipe', () {
+    final File recipe = File('fdroid/fr.vinylourson.is_the_bridge_up.yml');
+
+    String? field(String key) {
+      final RegExpMatch? m = RegExp(
+        '^\\s*-?\\s*$key:\\s*(\\S+)',
+        multiLine: true,
+      ).firstMatch(recipe.readAsStringSync());
+      return m?.group(1);
+    }
+
+    test('targets the version in pubspec', () {
+      // The recipe has drifted from pubspec twice already, and a stale one
+      // makes F-Droid rebuild the wrong commit and compare it against an APK
+      // it was never going to match.
+      final RegExpMatch version = RegExp(
+        r'^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$',
+        multiLine: true,
+      ).firstMatch(File('pubspec.yaml').readAsStringSync())!;
+      final String name = version.group(1)!;
+      final int code = int.parse(version.group(2)!);
+
+      expect(field('versionName'), name);
+      expect(field('commit'), 'v$name');
+      expect(field('CurrentVersion'), name);
+      // Splits offset arm64 by 2000; the recipe builds the arm64 APK.
+      expect(field('versionCode'), '${2000 + code}');
+      expect(field('CurrentVersionCode'), '${2000 + code}');
+    });
+
+    test('pins the signing key the releases actually use', () {
+      // F-Droid refuses any binary not signed by this certificate, so a wrong
+      // fingerprint here fails the build rather than accepting the wrong APK.
+      expect(
+        field('AllowedAPKSigningKeys'),
+        'f6428f82d1c634a8dd154ebb22a141ff716e93bd0442b35f0900f433497384a5',
+      );
+    });
+
+    test('builds with the same command as the release workflow', () {
+      // A divergence here is invisible until F-Droid rebuilds and gets
+      // different bytes, which is how the first rebuild check failed.
+      for (final String path in <String>[
+        '.github/workflows/release.yml',
+        '.github/workflows/reproducible.yml',
+        'fdroid/fr.vinylourson.is_the_bridge_up.yml',
+      ]) {
+        final String text = File(path).readAsStringSync();
+        expect(
+          text,
+          contains('--split-per-abi'),
+          reason: '$path must build split APKs',
+        );
+        expect(
+          text,
+          contains('--short=10'),
+          reason:
+              "$path must pin the abbreviation length; git's default "
+              'scales with repository size',
+        );
+      }
+    });
+  });
 }

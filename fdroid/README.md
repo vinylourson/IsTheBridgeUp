@@ -4,8 +4,24 @@
 [fdroiddata](https://gitlab.com/fdroid/fdroiddata) as
 `metadata/fr.vinylourson.is_the_bridge_up.yml`, via a merge request.
 
-The recipe itself is unverified — it can only really be exercised on F-Droid's
-buildserver — but the premise underneath it has been measured.
+**Reproducibility is verified.** An independent rebuild of `v1.1.3` on a clean
+runner produced a byte-identical `libapp.so` to the published APK, and every
+entry outside `META-INF/` matched:
+
+```
+rebuilt   libapp.so 4e1e2f75f11c5de81c7cb313d9336599b4c1a5e3bc8c3f31dd61eaa51e3a1805
+published libapp.so 4e1e2f75f11c5de81c7cb313d9336599b4c1a5e3bc8c3f31dd61eaa51e3a1805
+Reproducible: every non-signature entry matches.
+```
+
+Re-run it on any tag before submitting:
+
+```bash
+gh workflow run reproducible.yml -f tag=v1.1.3 --ref main
+```
+
+The recipe itself still has to be exercised on F-Droid's buildserver, which
+only they can do.
 
 ## Why `binary:` is worth the trouble
 
@@ -14,6 +30,18 @@ APK. On a match they publish **our** signed binary instead of re-signing with
 F-Droid's key, so there is one signing identity everywhere and a user can move
 between F-Droid and a direct download without uninstalling. Without it, those
 are two mutually exclusive apps.
+
+## What made it fail first
+
+The very first rebuild check failed, and the cause was not Flutter at all: the
+release job passed `--dart-define=GIT_SHA` and the rebuild did not, and that
+value is compiled into `libapp.so`. The build command now has one shape,
+mirrored in `release.yml`, `reproducible.yml` and this recipe, with a test
+asserting all three agree.
+
+`--short` also became `--short=10`. Git's default abbreviation length scales
+with repository size, so two clones can abbreviate the same commit differently
+and produce different binaries from identical source.
 
 ## The Flutter reproducibility problem, measured
 
@@ -56,10 +84,25 @@ rebuilt bytes to change.
 
 ## Submitting
 
-1. Fork <https://gitlab.com/fdroid/fdroiddata> (needs a GitLab account).
-2. Add the file as `metadata/fr.vinylourson.is_the_bridge_up.yml`.
-3. Run `fdroid readmeta && fdroid lint fr.vinylourson.is_the_bridge_up`.
-4. Open a merge request.
+Needs a GitLab account, which is the only step left that cannot be automated
+from here.
+
+1. Fork <https://gitlab.com/fdroid/fdroiddata>.
+2. Copy `fr.vinylourson.is_the_bridge_up.yml` to
+   `metadata/fr.vinylourson.is_the_bridge_up.yml` in the fork.
+3. Validate: `fdroid readmeta && fdroid lint fr.vinylourson.is_the_bridge_up`
+4. Open a merge request against fdroiddata.
 
 The listing text, icon and screenshots are read from `metadata/` at the root of
-this repository and do not need to be duplicated in fdroiddata.
+**this** repository, so they do not need duplicating in fdroiddata.
+
+### Worth saying in the merge request
+
+- The build is reproducible and `binary:` is set, so F-Droid can publish our
+  signed APK rather than re-signing. The verification workflow in this
+  repository runs the same comparison.
+- The SDK is vendored at `.flutter` and pinned, which is why `submodules: true`
+  and the path juggling in `prebuild`/`build` are there.
+- Most of this app was written with an AI coding assistant. F-Droid has no
+  policy on that, unlike IzzyOnDroid, but reviewers may reasonably want to
+  know rather than discover it from the commit log.
