@@ -82,6 +82,22 @@ Clones that init submodules pay about 184 MB for it. Upgrading Flutter is now a
 deliberate act: bump `FLUTTER_VERSION`, move the submodule, and expect the
 rebuilt bytes to change.
 
+## Validation
+
+`fdroid lint` runs clean against a real fdroiddata checkout:
+
+```
+fdroid readmeta
+fdroid lint fr.vinylourson.is_the_bridge_up     # no findings
+```
+
+It caught one thing first time round: `Categories: Time` is not a valid
+F-Droid category. The valid list lives in `config/categories.yml` in
+fdroiddata; this app uses `Navigation` and `Schedule`.
+
+Install the tooling with `brew install fdroidserver`, and lint inside a
+fdroiddata clone with the file copied into `metadata/`.
+
 ## Submitting
 
 Needs a GitLab account, which is the only step left that cannot be automated
