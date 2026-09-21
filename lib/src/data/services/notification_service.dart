@@ -187,6 +187,30 @@ class LocalNotificationService implements NotificationService {
     }
   }
 
+  /// The notification id a reminder posts under.
+  ///
+  /// Derived from the closure, not from the reminder's position in the list.
+  /// With a per-position id, two lead times for the same closure posted two
+  /// separate notifications whose text was word for word identical -- the
+  /// copy names absolute times, so a 1h and a 30min warning read the same.
+  /// Sharing an id makes the later one replace the earlier, leaving one card
+  /// per closure showing the most recent warning.
+  ///
+  /// Kinds keep separate id spaces. They post on different channels, and an
+  /// already-posted notification cannot move channel, so collapsing a
+  /// reopening onto a closing card would be unreliable rather than tidy.
+  ///
+  /// Minutes since the epoch, masked to stay a positive 32-bit int: unique
+  /// per closure for any plausible schedule, and stable across reschedules so
+  /// a refresh updates the same card instead of adding another.
+  static int notificationIdFor(Reminder reminder) {
+    final int minutes =
+        reminder.closure.start.millisecondsSinceEpoch ~/
+        Duration.millisecondsPerMinute;
+    final int base = minutes & 0x3FFFFFFF;
+    return reminder.kind == ReminderKind.reopening ? base | 0x40000000 : base;
+  }
+
   static NotificationDetails _detailsFor(ReminderKind kind) => switch (kind) {
     ReminderKind.closing => const NotificationDetails(
       android: AndroidNotificationDetails(

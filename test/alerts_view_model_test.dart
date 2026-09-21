@@ -9,6 +9,7 @@ import 'package:is_the_bridge_up/src/data/services/chaban_api_service.dart';
 import 'package:is_the_bridge_up/src/data/services/closure_cache_service.dart';
 import 'package:is_the_bridge_up/src/data/services/notification_service.dart';
 import 'package:is_the_bridge_up/src/domain/bridge_clock.dart';
+import 'package:is_the_bridge_up/src/domain/models/closure.dart';
 import 'package:is_the_bridge_up/src/domain/reminder_planner.dart';
 import 'package:is_the_bridge_up/src/ui/alerts/alerts_view_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -122,19 +123,26 @@ void main() {
     expect(t.fake.scheduled, hasLength(2));
   });
 
-  test('a refused prompt schedules nothing and reports being blocked', () async {
-    final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
-    t = build(notifications: FakeNotifications(grantOnRequest: false));
-    await t.repo.load();
-    await t.vm.load();
+  test(
+    'a refused prompt schedules nothing and reports being blocked',
+    () async {
+      final ({
+        AlertsViewModel vm,
+        FakeNotifications fake,
+        ClosureRepository repo,
+      })
+      t = build(notifications: FakeNotifications(grantOnRequest: false));
+      await t.repo.load();
+      await t.vm.load();
 
-    await t.vm.setEnabled(true);
+      await t.vm.setEnabled(true);
 
-    expect(t.vm.permission, NotificationPermission.denied);
-    expect(t.fake.scheduled, isEmpty);
-    // The screen needs to explain, not offer the button again.
-    expect(t.vm.blockedBySystem, isTrue);
-  });
+      expect(t.vm.permission, NotificationPermission.denied);
+      expect(t.fake.scheduled, isEmpty);
+      // The screen needs to explain, not offer the button again.
+      expect(t.vm.blockedBySystem, isTrue);
+    },
+  );
 
   test('turning alerts off cancels everything', () async {
     final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
@@ -149,24 +157,31 @@ void main() {
     expect(t.vm.scheduledCount, 0);
   });
 
-  test('adding a lead time adds reminders rather than replacing them', () async {
-    final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
-    t = build();
-    await t.repo.load();
-    await t.vm.load();
-    await t.vm.setEnabled(true);
+  test(
+    'adding a lead time adds reminders rather than replacing them',
+    () async {
+      final ({
+        AlertsViewModel vm,
+        FakeNotifications fake,
+        ClosureRepository repo,
+      })
+      t = build();
+      await t.repo.load();
+      await t.vm.load();
+      await t.vm.setEnabled(true);
 
-    final int withOneLead = t.fake.scheduled.length;
+      final int withOneLead = t.fake.scheduled.length;
 
-    await t.vm.toggleLeadTime(const Duration(days: 1));
+      await t.vm.toggleLeadTime(const Duration(days: 1));
 
-    expect(t.vm.leadTimes, hasLength(2));
-    expect(
-      t.fake.scheduled.length,
-      withOneLead * 2,
-      reason: 'each closure now warns twice',
-    );
-  });
+      expect(t.vm.leadTimes, hasLength(2));
+      expect(
+        t.fake.scheduled.length,
+        withOneLead * 2,
+        reason: 'each closure now warns twice',
+      );
+    },
+  );
 
   test('a feed refresh re-lays the reminders', () async {
     final ({AlertsViewModel vm, FakeNotifications fake, ClosureRepository repo})
@@ -204,10 +219,10 @@ void main() {
     await second.vm.load();
 
     expect(second.vm.enabled, isTrue);
-    expect(
-      second.vm.leadTimes,
-      <Duration>{const Duration(hours: 1), const Duration(minutes: 30)},
-    );
+    expect(second.vm.leadTimes, <Duration>{
+      const Duration(hours: 1),
+      const Duration(minutes: 30),
+    });
     expect(second.fake.scheduled, isNotEmpty, reason: 're-laid on launch');
   });
 
@@ -295,5 +310,102 @@ void main() {
     await second.repo.load();
     await second.vm.load();
     expect(second.vm.notifyReopening, isTrue);
+  });
+
+  group('notification ids', () {
+    tz.TZDateTime at(int day, int hour, [int minute = 0]) =>
+        tz.TZDateTime(paris, 2026, 8, day, hour, minute);
+
+    Closure closure(int day, int h1, int h2, String vessel) => Closure(
+      vesselLabel: vessel,
+      start: at(day, h1),
+      end: at(day, h2),
+      closureType: 'Totale',
+      isTotal: true,
+    );
+
+    Reminder reminder(Closure c, Duration lead, ReminderKind kind) => Reminder(
+      at: c.start.subtract(lead),
+      closure: c,
+      leadTime: lead,
+      kind: kind,
+    );
+
+    test('two lead times for one closure share an id', () {
+      // Otherwise they post as two separate cards, and because the copy names
+      // absolute times they read word for word identically -- which is what a
+      // user actually saw: the same notification apparently twice.
+      final Closure c = closure(23, 14, 15, 'BALMORAL');
+      expect(
+        LocalNotificationService.notificationIdFor(
+          reminder(c, const Duration(hours: 1), ReminderKind.closing),
+        ),
+        LocalNotificationService.notificationIdFor(
+          reminder(c, const Duration(minutes: 30), ReminderKind.closing),
+        ),
+      );
+    });
+
+    test('different closures get different ids', () {
+      expect(
+        LocalNotificationService.notificationIdFor(
+          reminder(
+            closure(23, 14, 15, 'A'),
+            const Duration(hours: 1),
+            ReminderKind.closing,
+          ),
+        ),
+        isNot(
+          LocalNotificationService.notificationIdFor(
+            reminder(
+              closure(24, 14, 15, 'B'),
+              const Duration(hours: 1),
+              ReminderKind.closing,
+            ),
+          ),
+        ),
+      );
+    });
+
+    test('closing and reopening do not collide', () {
+      // They post on different channels, and a posted notification cannot
+      // change channel, so they must not share an id.
+      final Closure c = closure(23, 14, 15, 'BALMORAL');
+      expect(
+        LocalNotificationService.notificationIdFor(
+          reminder(c, const Duration(hours: 1), ReminderKind.closing),
+        ),
+        isNot(
+          LocalNotificationService.notificationIdFor(
+            reminder(c, Duration.zero, ReminderKind.reopening),
+          ),
+        ),
+      );
+    });
+
+    test('ids stay a positive 32-bit int', () {
+      // Android notification ids are ints; a negative or overflowing value
+      // would be rejected or silently collide.
+      for (final ReminderKind kind in ReminderKind.values) {
+        final int id = LocalNotificationService.notificationIdFor(
+          reminder(closure(23, 14, 15, 'A'), const Duration(hours: 1), kind),
+        );
+        expect(id, greaterThan(0));
+        expect(id, lessThanOrEqualTo(0x7FFFFFFF));
+      }
+    });
+
+    test('the id is stable across reschedules', () {
+      // A feed refresh re-lays every reminder. An unstable id would add a new
+      // card each time instead of updating the one already showing.
+      final Closure c = closure(23, 14, 15, 'BALMORAL');
+      final int first = LocalNotificationService.notificationIdFor(
+        reminder(c, const Duration(hours: 1), ReminderKind.closing),
+      );
+      final int second = LocalNotificationService.notificationIdFor(
+        reminder(c, const Duration(hours: 1), ReminderKind.closing),
+      );
+      expect(first, second);
+    });
   });
 }
